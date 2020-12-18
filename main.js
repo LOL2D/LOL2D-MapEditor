@@ -107,15 +107,15 @@ function draw() {
 }
 
 function mouseDragged() {
-    // if (keyIsDown(32)) {
-    if (mode == MODE.TERRAIN) {
-        globalData.terraintab.editzone.camera.x += movedX;
-        globalData.terraintab.editzone.camera.y += movedY;
-    } else {
-        globalData.maptab.editzone.camera.x += movedX;
-        globalData.maptab.editzone.camera.y += movedY;
+    if (keyIsDown(32)) {
+        if (mode == MODE.TERRAIN) {
+            globalData.terraintab.editzone.camera.x += movedX;
+            globalData.terraintab.editzone.camera.y += movedY;
+        } else {
+            globalData.maptab.editzone.camera.x += movedX;
+            globalData.maptab.editzone.camera.y += movedY;
+        }
     }
-    // }
 }
 
 function mouseWheel(event) {
@@ -231,18 +231,36 @@ function drawEditTerrainZone(x, y, w, h) {
 
         if (terrain) {
             // edit zone
-            const { camera } = globalData.terraintab.editzone;
+            let { camera } = globalData.terraintab.editzone;
 
             // rects
-            fill("gray");
-            stroke("white");
-            for (let r of terrain.rects) {
-                rect(
-                    r.x * camera.scale + camera.x,
-                    r.y * camera.scale + camera.y,
-                    r.w * camera.scale,
-                    r.h * camera.scale
-                );
+            fill("#ddd9");
+            let dragging = null;
+            let hovered = false;
+
+            for (let i = 0; i < terrain.rects.length; i++) {
+                let r = terrain.rects[i];
+
+                let rx = r.x * camera.scale + camera.x;
+                let ry = r.y * camera.scale + camera.y;
+                let rw = r.w * camera.scale;
+                let rh = r.h * camera.scale;
+
+                if (!hovered && isMouseInRect(rx, ry, rw, rh)) {
+                    stroke("red");
+                    hovered = true;
+                } else {
+                    stroke("white");
+                }
+
+                draggableRect(rx, ry, rw, rh, (deltaX, deltaY) => {
+                    if (!dragging) {
+                        r.x = round(r.x + deltaX / camera.scale);
+                        r.y = round(r.y + deltaY / camera.scale);
+
+                        dragging = r;
+                    }
+                });
             }
 
             // grid
@@ -413,6 +431,15 @@ function isMouseInRect(x, y, w, h) {
     return mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h;
 }
 
+// interactive rect
+function draggableRect(x, y, w, h, onDrag) {
+    rect(x, y, w, h);
+
+    if (isMouseInRect(x, y, w, h) && isMouseDragged()) {
+        onDrag && onDrag(mouseX - pmouseX, mouseY - pmouseY);
+    }
+}
+
 // mouse event
 function isMousePressed() {
     return !pMouseIsPressed && mouseIsPressed;
@@ -422,8 +449,11 @@ function isMouseReleased() {
     return pMouseIsPressed && !mouseIsPressed;
 }
 
-// camera
+function isMouseDragged() {
+    return mouseIsPressed && (pmouseX != mouseX || pmouseY != mouseY);
+}
 
+// camera
 function resetCamera(camera) {
     camera.scale = 1;
     camera.x = width / 2;
