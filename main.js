@@ -20,14 +20,13 @@ let globalData = {
     terraintab: {
         currentTerrainIndex: -1,
         editzone: {
+            imageData: null,
             camera: { x: 0, y: 0, scale: 1 },
             selectedRectIndex: -1,
             selectedRectMouseDelta: { x: 0, y: 0 },
         },
     },
 };
-
-let imageData;
 
 let UI = {
     // map tab
@@ -36,9 +35,7 @@ let UI = {
     tabMapBtn: ["Map", 105, 10, 100, 30],
     newMapBtn: ["New map", 10, 60, 190, 25],
     openMapBtn: ["Open map...", 10, 90, 190, 25],
-    saveMapBtn: ["Save map", 10, 120, 190, 25],
-    undoMapBtn: ["Undo", 10, 160, 92.5, 25],
-    redoMapBtn: ["Redo", 107.5, 160, 92.5, 25],
+    exportMapBtn: ["Export map...", 10, 120, 190, 25],
 
     listTerrainsZoneTitle: "List terrains:",
     listTerrainsZone: [10, 235, 190, 355],
@@ -49,29 +46,20 @@ let UI = {
     tabTerrainBtn: ["Terrain", 5, 10, 100, 30],
     newTerrainBtn: ["New terrain", 10, 60, 190, 25],
     openTerrainBtn: ["Open terrain...", 10, 90, 190, 25],
-    saveTerrainBtn: ["Save terrain", 10, 120, 190, 25],
+    exportTerrainBtn: ["Export terrain...", 10, 120, 190, 25],
 
-    goToCenterTerrainBtn: ["Reset camera", 10, 160, 190, 25],
-    createRectBtn: ["Create rect", 10, 190, 92.5, 25, false, null, "green"],
-    loadImageTerrainBtn: ["Load image...", 107.5, 190, 92.5, 25],
-    deleteSelectedRectBtn: [
-        "Delete selected",
-        10,
-        220,
-        92.5,
-        25,
-        false,
-        null,
-        "red",
-    ],
+    removeImageTerrainBtn: ["Remove image", 10, 160, 92.5, 25],
+    loadImageTerrainBtn: ["Load image...", 107.5, 160, 92.5, 25, 0, 0, "black"],
+    resetCameraTerrainBtn: ["Reset camera", 10, 190, 92.5, 25],
+    createRectBtn: ["Create rect", 107.5, 190, 92.5, 25, 0, 0, "green"],
+    deleteSelectedRectBtn: ["Delete selected", 10, 220, 92.5, 25, 0, 0, "red"],
     editSelectedRectBtn: ["Edit selected", 107.5, 220, 92.5, 25],
-    undoTerrainBtn: ["Undo", 10, 250, 92.5, 25],
-    redoTerrainBtn: ["Redo", 107.5, 250, 92.5, 25],
 };
 
 function setup() {
     createCanvas(800, 600).id("game-canvas");
     textAlign(CENTER, CENTER);
+    imageMode(CENTER);
     preventRightClick("game-canvas");
 
     stats = new Stats();
@@ -215,17 +203,25 @@ function drawModeTerrain() {
         console.log("open");
     }
 
+    if (button(...UI.removeImageTerrainBtn)) {
+        globalData.terraintab.editzone.imageData = null;
+    }
+
     if (button(...UI.loadImageTerrainBtn)) {
         let terrain = getEditingTerrain();
 
         if (terrain) {
             createFileInput((files) => {
-                imageData = getFileLocal(files);
+                globalData.terraintab.editzone.imageData = getFileLocal(files);
                 removeElements(); // https://p5js.org/reference/#/p5/removeElements
             })
                 .style("display: none")
                 .elt.click();
         }
+    }
+
+    if (button(...UI.resetCameraTerrainBtn)) {
+        resetCamera(globalData.terraintab.editzone.camera);
     }
 
     if (button(...UI.createRectBtn)) {
@@ -264,20 +260,13 @@ function drawModeTerrain() {
         }
     }
 
-    if (button(...UI.undoTerrainBtn)) {
-        console.log("undo");
-    }
+    if (button(...UI.exportTerrainBtn)) {
+        let terrain = getEditingTerrain();
 
-    if (button(...UI.redoTerrainBtn)) {
-        console.log("redo");
-    }
-
-    if (button(...UI.saveTerrainBtn)) {
-        console.log("save");
-    }
-
-    if (button(...UI.goToCenterTerrainBtn)) {
-        resetCamera(globalData.terraintab.editzone.camera);
+        if (terrain) {
+            let data = JSON.stringify(terrain);
+            window.prompt("Terrain data: (Ctrl+C to copy)", data);
+        }
     }
 }
 
@@ -298,16 +287,8 @@ function drawModeMap() {
         console.log("open");
     }
 
-    if (button(...UI.undoMapBtn)) {
-        console.log("undo");
-    }
-
-    if (button(...UI.redoMapBtn)) {
-        console.log("redo");
-    }
-
-    if (button(...UI.saveMapBtn)) {
-        console.log("save");
+    if (button(...UI.exportMapBtn)) {
+        console.log("export");
     }
 
     // terrains zone
@@ -380,6 +361,7 @@ function drawEditTerrainZone(x, y, w, h) {
     text(`Grid size: ${gs}px`, x, y + h - 30, 150, 30);
 
     // image data
+    const { imageData } = globalData.terraintab.editzone;
     if (imageData) {
         image(
             imageData,
