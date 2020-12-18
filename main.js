@@ -232,16 +232,14 @@ function drawEditTerrainZone(x, y, w, h) {
         if (terrain) {
             // edit zone
             const { camera } = globalData.terraintab.editzone;
-            let cx = camera.x + x / 2;
-            let cy = camera.y + y / 2;
 
             // rects
             fill("gray");
             stroke("white");
             for (let r of terrain.rects) {
                 rect(
-                    r.x * camera.scale + cx,
-                    r.y * camera.scale + cy,
+                    r.x * camera.scale + camera.x,
+                    r.y * camera.scale + camera.y,
                     r.w * camera.scale,
                     r.h * camera.scale
                 );
@@ -253,7 +251,7 @@ function drawEditTerrainZone(x, y, w, h) {
             // center point
             fill("red");
             noStroke();
-            circle(cx, cy, 5);
+            circle(camera.x, camera.y, 5);
 
             // terrain name
             fill("white");
@@ -434,14 +432,14 @@ function resetCamera(camera) {
 
 // source: https://github.com/HoangTran0410/ImageToSpriteJson/blob/db1f19ec11ba899e71dff1af31f656495d5a7281/main.js#L197
 function zoomTo(camera, _ratio) {
-    let ratio = max(0.5, _ratio);
+    let ratio = max(0.1, _ratio);
 
     let tiLe = ratio / camera.scale;
 
     camera.scale = ratio;
 
-    let mx = mouseX - UI.terrainEditorZone[0];
-    let my = mouseY - UI.terrainEditorZone[1];
+    let mx = mouseX; //- UI.terrainEditorZone[0];
+    let my = mouseY; //- UI.terrainEditorZone[1];
 
     // Zoom from the triggering point of the event
     camera.x = mx + (camera.x - mx) * tiLe;
