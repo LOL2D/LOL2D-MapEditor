@@ -4,8 +4,18 @@ const MODE = {
 };
 let mode = MODE.MAP;
 let pMouseIsPressed;
-
 let stats;
+
+let setting = {
+    maptab: {
+        listBlocks: {
+            itemIndex: 0,
+            itemPerPage: 2,
+            data: TERRAIN_MAP.SUMMORNER_RIFT,
+        },
+    },
+    blocktab: {},
+};
 
 function setup() {
     createCanvas(800, 600).id("game-canvas");
@@ -48,6 +58,10 @@ function draw() {
 }
 
 function drawModeBlock() {
+    // ---------- background ----------
+    fill("#333");
+    rect(0, 40, width, height - 40 - 5);
+
     // ---------- menu zone ----------
     fill("#333");
     rect(5, 40, 200, height - 40 - 5);
@@ -79,13 +93,17 @@ function drawModeBlock() {
 
     // ---------- editor zone ----------
     fill("gray");
-    rect(210, 40, width - 210 - 5, height - 40 - 5);
+    rect(210, 45, width - 210 - 5, height - 45 - 5);
 
     fill("white");
     text("BLOCK", width / 2, height / 2);
 }
 
 function drawModeMap() {
+    // ---------- background ----------
+    fill("#333");
+    rect(0, 40, width, height - 40 - 5);
+
     // ---------- menu zone ----------
     fill("#333");
     rect(5, 40, 200, height - 40 - 5);
@@ -115,17 +133,82 @@ function drawModeMap() {
     fill("white");
     text("List Blocks: ", 45, 220);
 
-    listBlocks(10, 235, 190, 355);
+    listScrollBlocks(10, 235, 190, 355);
 
     // ---------- editor zone ----------
-    fill("gray");
-    rect(210, 40, width - 210 - 5, height - 40 - 5);
+    // fill("gray");
+    // rect(210, 45, width - 210 - 5, height - 45 - 5);
 
-    fill("white");
-    text("MAP", width / 2, height / 2);
+    // fill("white");
+    // text("MAP", width / 2, height / 2);
 }
 
 // helpers
+function listScrollBlocks(x, y, w, h) {
+    // background
+    fill("#111");
+    rect(x, y, w, h);
+
+    // data
+    const { itemIndex, itemPerPage, data } = setting.maptab.listBlocks;
+
+    // buttons
+    if (button("Scroll Up ↑", x, y, w, 20, itemIndex == 0)) {
+        if (itemIndex > 0) setting.maptab.listBlocks.itemIndex--;
+    }
+
+    let isEndOfList = itemIndex == data.length - itemPerPage;
+    if (button("Scroll Down ↓", x, y + h - 20, w, 20, isEndOfList)) {
+        if (!isEndOfList) setting.maptab.listBlocks.itemIndex++;
+    }
+
+    // list blocks
+    let blockW = w;
+    let blockH = (h - 40) / itemPerPage;
+
+    for (let i = itemIndex; i < itemIndex + itemPerPage; i++) {
+        let blockX = x;
+        let blockY = y + (i - itemIndex) * blockH + 20;
+        renderBlockItem(i, data[i], blockX, blockY, blockW, blockH);
+    }
+}
+
+function renderBlockItem(title, block, x, y, w, h) {
+    // background
+    stroke("white");
+    noFill();
+    rect(x, y, w, h);
+
+    // scale up/down to fit item container
+    let maxDistance = 0;
+    for (let p of block.shapeVertices) {
+        for (let p2 of block.shapeVertices) {
+            let distance = dist(p.x, p.y, p2.x, p2.y);
+            maxDistance = max(maxDistance, distance);
+        }
+    }
+
+    let scaleRatio = min(w, h) / maxDistance;
+
+    // draw shape
+    fill("gray");
+    beginShape();
+    for (let p of block.shapeVertices) {
+        vertex(p.x * scaleRatio + x + w / 2, p.y * scaleRatio + y + h / 2);
+    }
+    endShape(CLOSE);
+
+    // title
+    fill("white");
+    noStroke();
+    text(title, x + 10, y + 10);
+
+    // buttons
+    if (button("Edit", x + w - 50, y + h - 20, 50, 20)) {
+        console.log("edit");
+    }
+}
+
 function button(t, x, y, w, h, isActive) {
     let isHover = mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h;
 
@@ -149,17 +232,11 @@ function button(t, x, y, w, h, isActive) {
     rect(x, y, w, h);
 
     // text
-    fill("white");
+    fill(isActive ? "gray" : "white");
     noStroke();
     text(t, x + w / 2, y + h / 2);
 
     return isMousePressed() && isHover;
-}
-
-function listBlocks(x, y, w, h) {
-    // background
-    fill("#111");
-    rect(x, y, w, h);
 }
 
 function isMousePressed() {
