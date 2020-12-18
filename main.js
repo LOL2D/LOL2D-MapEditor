@@ -58,6 +58,7 @@ let UI = {
 function setup() {
     createCanvas(800, 600).id("game-canvas");
     textAlign(CENTER, CENTER);
+    preventRightClick("game-canvas");
 
     stats = new Stats();
     stats.showPanel(0);
@@ -107,7 +108,7 @@ function draw() {
 }
 
 function mouseDragged() {
-    if (keyIsDown(32)) {
+    if (mouseButton == RIGHT) {
         if (mode == MODE.TERRAIN) {
             globalData.terraintab.editzone.camera.x += movedX;
             globalData.terraintab.editzone.camera.y += movedY;
@@ -435,7 +436,7 @@ function isMouseInRect(x, y, w, h) {
 function draggableRect(x, y, w, h, onDrag) {
     rect(x, y, w, h);
 
-    if (isMouseInRect(x, y, w, h) && isMouseDragged()) {
+    if (isMouseInRect(x, y, w, h) && isMouseDragged() && mouseButton == LEFT) {
         onDrag && onDrag(mouseX - pmouseX, mouseY - pmouseY);
     }
 }
@@ -478,4 +479,15 @@ function zoomTo(camera, _ratio) {
 
 function zoomBy(camera, value) {
     zoomTo(camera, camera.scale + (value > 0 ? -0.1 : 0.1));
+}
+
+// others
+function preventRightClick(id) {
+    document.getElementById(id).addEventListener(
+        "contextmenu",
+        function (evt) {
+            evt.preventDefault();
+        },
+        false
+    );
 }
