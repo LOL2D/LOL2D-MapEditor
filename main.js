@@ -121,25 +121,30 @@ function draw() {
 function mouseDragged() {
     if (mouseButton == RIGHT) {
         if (mode == MODE.TERRAIN) {
+            // drag camera
             globalData.terraintab.editzone.camera.x += movedX;
             globalData.terraintab.editzone.camera.y += movedY;
         } else {
+            // drag camera
             globalData.maptab.editzone.camera.x += movedX;
             globalData.maptab.editzone.camera.y += movedY;
         }
     } else {
         if (mode == MODE.TERRAIN) {
-            const {
-                x: delX,
-                y: delY,
-            } = globalData.terraintab.editzone.selectedRectMouseDelta;
+            // drag rect
+            if (isMouseInRect(...UI.terrainEditorZone)) {
+                const {
+                    x: delX,
+                    y: delY,
+                } = globalData.terraintab.editzone.selectedRectMouseDelta;
 
-            const { camera } = globalData.terraintab.editzone;
+                const { camera } = globalData.terraintab.editzone;
 
-            let rect = getSelectedRect();
-            if (rect) {
-                rect.x = (mouseX + delX - camera.x) / camera.scale;
-                rect.y = (mouseY + delY - camera.y) / camera.scale;
+                let rect = getSelectedRect();
+                if (rect) {
+                    rect.x = ~~((mouseX + delX - camera.x) / camera.scale);
+                    rect.y = ~~((mouseY + delY - camera.y) / camera.scale);
+                }
             }
         } else {
             // todo
@@ -174,10 +179,8 @@ function mouseWheel(event) {
 }
 
 function keyPressed() {
-    if (globalData.terraintab.editzone.selectedRectIndex) {
-        // get selected rect
-        let selectedRect = getSelectedRect();
-
+    let selectedRect = getSelectedRect();
+    if (selectedRect) {
         if (keyCode == LEFT_ARROW) {
             selectedRect.x--;
         }
@@ -304,6 +307,7 @@ function drawEditTerrainZone(x, y, w, h) {
 
         // grid
         stroke("#555");
+        strokeWeight(1);
         let zoneLeft = UI.terrainEditorZone[0];
         let zoneRight = zoneLeft + UI.terrainEditorZone[2];
         let zoneTop = UI.terrainEditorZone[1];
@@ -320,6 +324,7 @@ function drawEditTerrainZone(x, y, w, h) {
 
         // flags
         let hovered = false;
+        let isSelectRect = false;
 
         // rects
         fill("#ddd9");
@@ -345,23 +350,30 @@ function drawEditTerrainZone(x, y, w, h) {
             if (globalData.terraintab.editzone.selectedRectIndex == i) {
                 stroke("yellow");
                 strokeWeight(2);
+            } else {
+                strokeWeight(1);
             }
 
             // select rect
-            if (isMouseInRect(rx, ry, rw, rh) && isMousePressed()) {
-                globalData.terraintab.editzone.selectedRectIndex = i;
-                globalData.terraintab.editzone.selectedRectMouseDelta = {
-                    x: rx - mouseX,
-                    y: ry - mouseY,
-                };
-            }
+            if (isMousePressed()) {
+                if (isMouseInRect(rx, ry, rw, rh)) {
+                    globalData.terraintab.editzone.selectedRectIndex = i;
+                    globalData.terraintab.editzone.selectedRectMouseDelta = {
+                        x: rx - mouseX,
+                        y: ry - mouseY,
+                    };
 
-            // mouseX - (r.x * camera.scale + camera.x)
-            //delta + r.x * camera.scale + camera.x =  mouseX
-            //
+                    isSelectRect = true;
+                }
+            }
 
             // draw rect
             rect(rx, ry, rw, rh);
+        }
+
+        // remove selected index on click outside rects
+        if (!isSelectRect && isMousePressed() && isMouseInRect(x, y, w, h)) {
+            globalData.terraintab.editzone.selectedRectIndex = -1;
         }
 
         // center point
@@ -459,7 +471,7 @@ function renderTerrainItem(index, terrain, x, y, w, h) {
     let scaleRatio = min(w, h) / max(W, H);
 
     // draw shape
-    fill("gray");
+    fill("#ddd9");
     for (let r of terrain.rects) {
         rect(
             r.x * scaleRatio + x + w / 2,
