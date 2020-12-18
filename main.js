@@ -52,7 +52,7 @@ let UI = {
     loadImageTerrainBtn: ["Load image...", 10, 160, 92.5, 25],
     goToCenterTerrainBtn: ["Reset camera", 107.5, 160, 92.5, 25],
     createTerrainBtn: ["Create block", 10, 190, 92.5, 25, false, null, "green"],
-    deleteTerrainBtn: [
+    deleteSelectedBlockBtn: [
         "Delete selected",
         107.5,
         190,
@@ -119,35 +119,29 @@ function draw() {
 }
 
 function mouseDragged() {
-    if (mouseButton == RIGHT) {
-        if (mode == MODE.TERRAIN) {
-            // drag camera
-            globalData.terraintab.editzone.camera.x += movedX;
-            globalData.terraintab.editzone.camera.y += movedY;
-        } else {
-            // drag camera
-            globalData.maptab.editzone.camera.x += movedX;
-            globalData.maptab.editzone.camera.y += movedY;
-        }
-    } else {
-        if (mode == MODE.TERRAIN) {
-            // drag rect
-            if (isMouseInRect(...UI.terrainEditorZone)) {
+    if (mode == MODE.TERRAIN) {
+        if (isMouseInRect(...UI.terrainEditorZone)) {
+            let rect = getSelectedRect();
+            if (rect) {
+                // drag selected rect
                 const {
                     x: delX,
                     y: delY,
                 } = globalData.terraintab.editzone.selectedRectMouseDelta;
 
                 const { camera } = globalData.terraintab.editzone;
-
-                let rect = getSelectedRect();
-                if (rect) {
-                    rect.x = ~~((mouseX + delX - camera.x) / camera.scale);
-                    rect.y = ~~((mouseY + delY - camera.y) / camera.scale);
-                }
+                rect.x = ~~((mouseX + delX - camera.x) / camera.scale);
+                rect.y = ~~((mouseY + delY - camera.y) / camera.scale);
+            } else {
+                // drag camera
+                globalData.terraintab.editzone.camera.x += movedX;
+                globalData.terraintab.editzone.camera.y += movedY;
             }
-        } else {
-            // todo
+        }
+    } else {
+        if (isMouseInRect(...UI.mapEditorZone)) {
+            globalData.maptab.editzone.camera.x += movedX;
+            globalData.maptab.editzone.camera.y += movedY;
         }
     }
 }
@@ -226,12 +220,12 @@ function drawModeTerrain() {
         console.log("create terrain");
     }
 
-    if (button(...UI.deleteTerrainBtn)) {
-        let editingTerrain = getEditingTerrain();
+    if (button(...UI.deleteSelectedBlockBtn)) {
+        let selectedRect = getSelectedRect();
 
-        if (editingTerrain != null) {
-            if (window.confirm("Are you sure want to delete selected block")) {
-                editingTerrain.rects.splice(
+        if (selectedRect != null) {
+            if (window.confirm("Are you sure want to delete selected rect")) {
+                getEditingTerrain().rects.splice(
                     globalData.terraintab.editzone.selectedRectIndex,
                     1
                 );
@@ -312,7 +306,18 @@ function drawEditTerrainZone(x, y, w, h) {
         let zoneRight = zoneLeft + UI.terrainEditorZone[2];
         let zoneTop = UI.terrainEditorZone[1];
         let zoneBottom = zoneTop + UI.terrainEditorZone[3];
+        let gridSizeRange = [50, 100];
         let gridSize = 50 * camera.scale;
+
+        if (gridSize < gridSizeRange[0]) {
+            while (gridSize < gridSizeRange[0]) {
+                gridSize *= 2;
+            }
+        } else if (gridSize > gridSizeRange[1]) {
+            while (gridSize > gridSizeRange[1]) {
+                gridSize = ~~(gridSize / 2);
+            }
+        }
 
         for (let i = camera.x; i > zoneLeft; i -= gridSize) {
             line(i, zoneTop, i, zoneBottom);
@@ -321,6 +326,18 @@ function drawEditTerrainZone(x, y, w, h) {
         for (let i = camera.x; i < zoneRight; i += gridSize) {
             line(i, zoneTop, i, zoneBottom);
         }
+
+        for (let i = camera.y; i > zoneTop; i -= gridSize) {
+            line(zoneLeft, i, zoneRight, i);
+        }
+
+        for (let i = camera.y; i < zoneBottom; i += gridSize) {
+            line(zoneLeft, i, zoneRight, i);
+        }
+
+        let gs = (gridSize / camera.scale).toFixed(2);
+        fill("white");
+        text(`Grid size: ${gs}px`, x, y + h - 30, 150, 30);
 
         // flags
         let hovered = false;
@@ -607,7 +624,7 @@ function zoomTo(camera, _ratio) {
 }
 
 function zoomBy(camera, value) {
-    zoomTo(camera, camera.scale + (value > 0 ? -0.1 : 0.1));
+    zoomTo(camera, camera.scale + (value > 0 ? -0.3 : 0.3));
 }
 
 // others
