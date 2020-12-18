@@ -27,6 +27,8 @@ let globalData = {
     },
 };
 
+let imageData;
+
 let UI = {
     // map tab
     menuMapZone: [5, 40, 200, 555],
@@ -49,21 +51,22 @@ let UI = {
     openTerrainBtn: ["Open terrain...", 10, 90, 190, 25],
     saveTerrainBtn: ["Save terrain", 10, 120, 190, 25],
 
-    loadImageTerrainBtn: ["Load image...", 10, 160, 92.5, 25],
-    goToCenterTerrainBtn: ["Reset camera", 107.5, 160, 92.5, 25],
-    createTerrainBtn: ["Create block", 10, 190, 92.5, 25, false, null, "green"],
-    deleteSelectedBlockBtn: [
+    goToCenterTerrainBtn: ["Reset camera", 10, 160, 190, 25],
+    createRectBtn: ["Create rect", 10, 190, 92.5, 25, false, null, "green"],
+    loadImageTerrainBtn: ["Load image...", 107.5, 190, 92.5, 25],
+    deleteSelectedRectBtn: [
         "Delete selected",
-        107.5,
-        190,
+        10,
+        220,
         92.5,
         25,
         false,
         null,
         "red",
     ],
-    undoTerrainBtn: ["Undo", 10, 220, 92.5, 25],
-    redoTerrainBtn: ["Redo", 107.5, 220, 92.5, 25],
+    editSelectedRectBtn: ["Edit selected", 107.5, 220, 92.5, 25],
+    undoTerrainBtn: ["Undo", 10, 250, 92.5, 25],
+    redoTerrainBtn: ["Redo", 107.5, 250, 92.5, 25],
 };
 
 function setup() {
@@ -213,14 +216,29 @@ function drawModeTerrain() {
     }
 
     if (button(...UI.loadImageTerrainBtn)) {
-        console.log("load image");
+        let terrain = getEditingTerrain();
+
+        if (terrain) {
+            createFileInput((files) => {
+                imageData = getFileLocal(files);
+                removeElements(); // https://p5js.org/reference/#/p5/removeElements
+            })
+                .style("display: none")
+                .elt.click();
+        }
     }
 
-    if (button(...UI.createTerrainBtn)) {
-        console.log("create terrain");
+    if (button(...UI.createRectBtn)) {
+        let terrain = getEditingTerrain();
+        if (terrain) {
+            let w = window.prompt("width: ");
+            let h = window.prompt("height: ");
+
+            terrain.rects.push({ x: 0, y: 0, w, h });
+        }
     }
 
-    if (button(...UI.deleteSelectedBlockBtn)) {
+    if (button(...UI.deleteSelectedRectBtn)) {
         let selectedRect = getSelectedRect();
 
         if (selectedRect != null) {
@@ -229,7 +247,20 @@ function drawModeTerrain() {
                     globalData.terraintab.editzone.selectedRectIndex,
                     1
                 );
+
+                globalData.terraintab.editzone.selectedRectIndex = -1;
             }
+        }
+    }
+
+    if (button(...UI.editSelectedRectBtn)) {
+        let selectedRect = getSelectedRect();
+
+        if (selectedRect != null) {
+            selectedRect.w = Number(window.prompt("width: ", selectedRect.w));
+            selectedRect.h = Number(window.prompt("height: ", selectedRect.h));
+
+            globalData.terraintab.editzone.selectedRectIndex = -1;
         }
     }
 
@@ -296,117 +327,136 @@ function drawEditTerrainZone(x, y, w, h) {
 
     let terrain = getEditingTerrain();
 
-    if (terrain) {
-        let { camera } = globalData.terraintab.editzone;
-
-        // grid
-        stroke("#555");
-        strokeWeight(1);
-        let zoneLeft = UI.terrainEditorZone[0];
-        let zoneRight = zoneLeft + UI.terrainEditorZone[2];
-        let zoneTop = UI.terrainEditorZone[1];
-        let zoneBottom = zoneTop + UI.terrainEditorZone[3];
-        let gridSizeRange = [50, 100];
-        let gridSize = 50 * camera.scale;
-
-        if (gridSize < gridSizeRange[0]) {
-            while (gridSize < gridSizeRange[0]) {
-                gridSize *= 2;
-            }
-        } else if (gridSize > gridSizeRange[1]) {
-            while (gridSize > gridSizeRange[1]) {
-                gridSize = ~~(gridSize / 2);
-            }
-        }
-
-        for (let i = camera.x; i > zoneLeft; i -= gridSize) {
-            line(i, zoneTop, i, zoneBottom);
-        }
-
-        for (let i = camera.x; i < zoneRight; i += gridSize) {
-            line(i, zoneTop, i, zoneBottom);
-        }
-
-        for (let i = camera.y; i > zoneTop; i -= gridSize) {
-            line(zoneLeft, i, zoneRight, i);
-        }
-
-        for (let i = camera.y; i < zoneBottom; i += gridSize) {
-            line(zoneLeft, i, zoneRight, i);
-        }
-
-        let gs = (gridSize / camera.scale).toFixed(2);
+    if (!terrain) {
         fill("white");
-        text(`Grid size: ${gs}px`, x, y + h - 30, 150, 30);
-
-        // flags
-        let hovered = false;
-        let isSelectRect = false;
-
-        // rects
-        fill("#ddd9");
-        strokeWeight(1);
-
-        for (let i = 0; i < terrain.rects.length; i++) {
-            let r = terrain.rects[i];
-
-            let rx = r.x * camera.scale + camera.x;
-            let ry = r.y * camera.scale + camera.y;
-            let rw = r.w * camera.scale;
-            let rh = r.h * camera.scale;
-
-            // hight light on hover
-            if (!hovered && isMouseInRect(rx, ry, rw, rh)) {
-                stroke("red");
-                hovered = true;
-            } else {
-                stroke("white");
-            }
-
-            // hight light selected rect
-            if (globalData.terraintab.editzone.selectedRectIndex == i) {
-                stroke("yellow");
-                strokeWeight(2);
-            } else {
-                strokeWeight(1);
-            }
-
-            // select rect
-            if (isMousePressed()) {
-                if (isMouseInRect(rx, ry, rw, rh)) {
-                    globalData.terraintab.editzone.selectedRectIndex = i;
-                    globalData.terraintab.editzone.selectedRectMouseDelta = {
-                        x: rx - mouseX,
-                        y: ry - mouseY,
-                    };
-
-                    isSelectRect = true;
-                }
-            }
-
-            // draw rect
-            rect(rx, ry, rw, rh);
-        }
-
-        // remove selected index on click outside rects
-        if (!isSelectRect && isMousePressed() && isMouseInRect(x, y, w, h)) {
-            globalData.terraintab.editzone.selectedRectIndex = -1;
-        }
-
-        // center point
-        fill("red");
-        noStroke();
-        circle(camera.x, camera.y, 5);
-
-        // terrain name
-        fill("white");
-        noStroke();
         text(
-            `Terrain: ${globalData.terraintab.currentTerrainIndex} - ${terrain.name}`,
+            "Click tab 'Map' -> Choose terrain in 'List terrains' -> Click 'Edit'.",
             x + w / 2,
-            y + 10
+            y + h / 2
+        );
+        return;
+    }
+
+    let { camera } = globalData.terraintab.editzone;
+
+    // grid
+    stroke("#555");
+    strokeWeight(1);
+    let zoneLeft = UI.terrainEditorZone[0];
+    let zoneRight = zoneLeft + UI.terrainEditorZone[2];
+    let zoneTop = UI.terrainEditorZone[1];
+    let zoneBottom = zoneTop + UI.terrainEditorZone[3];
+    let gridSizeRange = [50, 100];
+    let gridSize = 50 * camera.scale;
+
+    if (gridSize < gridSizeRange[0]) {
+        while (gridSize < gridSizeRange[0]) {
+            gridSize *= 2;
+        }
+    } else if (gridSize > gridSizeRange[1]) {
+        while (gridSize > gridSizeRange[1]) {
+            gridSize = ~~(gridSize / 2);
+        }
+    }
+
+    for (let i = camera.x; i > zoneLeft; i -= gridSize) {
+        line(i, zoneTop, i, zoneBottom);
+    }
+
+    for (let i = camera.x; i < zoneRight; i += gridSize) {
+        line(i, zoneTop, i, zoneBottom);
+    }
+
+    for (let i = camera.y; i > zoneTop; i -= gridSize) {
+        line(zoneLeft, i, zoneRight, i);
+    }
+
+    for (let i = camera.y; i < zoneBottom; i += gridSize) {
+        line(zoneLeft, i, zoneRight, i);
+    }
+
+    let gs = (gridSize / camera.scale).toFixed(2);
+    fill("white");
+    text(`Grid size: ${gs}px`, x, y + h - 30, 150, 30);
+
+    // image data
+    if (imageData) {
+        image(
+            imageData,
+            camera.x,
+            camera.y,
+            imageData.width * camera.scale,
+            imageData.height * camera.scale
         );
     }
+
+    // flags
+    let hovered = false;
+    let isSelectRect = false;
+
+    // rects
+    fill("#ddd9");
+    strokeWeight(1);
+
+    for (let i = 0; i < terrain.rects.length; i++) {
+        let r = terrain.rects[i];
+
+        let rx = r.x * camera.scale + camera.x;
+        let ry = r.y * camera.scale + camera.y;
+        let rw = r.w * camera.scale;
+        let rh = r.h * camera.scale;
+
+        // hight light on hover
+        if (!hovered && isMouseInRect(rx, ry, rw, rh)) {
+            stroke("red");
+            hovered = true;
+        } else {
+            stroke("white");
+        }
+
+        // hight light selected rect
+        if (globalData.terraintab.editzone.selectedRectIndex == i) {
+            stroke("yellow");
+            strokeWeight(2);
+        } else {
+            strokeWeight(1);
+        }
+
+        // select rect
+        if (isMousePressed()) {
+            if (isMouseInRect(rx, ry, rw, rh)) {
+                globalData.terraintab.editzone.selectedRectIndex = i;
+                globalData.terraintab.editzone.selectedRectMouseDelta = {
+                    x: rx - mouseX,
+                    y: ry - mouseY,
+                };
+
+                isSelectRect = true;
+            }
+        }
+
+        // draw rect
+        rect(rx, ry, rw, rh);
+    }
+
+    // remove selected index on click outside rects
+    if (!isSelectRect && isMousePressed() && isMouseInRect(x, y, w, h)) {
+        globalData.terraintab.editzone.selectedRectIndex = -1;
+    }
+
+    // center point
+    fill("red");
+    noStroke();
+    circle(camera.x, camera.y, 5);
+
+    // terrain name
+    fill("white");
+    noStroke();
+    text(
+        `Terrain: ${globalData.terraintab.currentTerrainIndex} - ${terrain.name}`,
+        x + w / 2,
+        y + 10
+    );
 }
 
 function drawEditMapZone(x, y, w, h) {
@@ -571,7 +621,7 @@ function button(t, x, y, w, h, isActive, bgColor, hoverColor, activeColor) {
     noStroke();
     text(t, x + w / 2, y + h / 2);
 
-    return isMousePressed() && isHover;
+    return isMouseReleased() && isHover;
 }
 
 function isMouseInRect(x, y, w, h) {
@@ -636,4 +686,15 @@ function preventRightClick(id) {
         },
         false
     );
+}
+
+// files
+// https://github.com/HoangTran0410/Paint-P5/blob/75a4f7ad5d0568b0d4bb1a5743a488191e38be53/Skech.js#L20
+function getFileLocal(file) {
+    if (file.type === "image") {
+        return createImg(file.data).hide();
+    } else {
+        alert("Not an image file! , Please choose another file");
+        return null;
+    }
 }
