@@ -21,7 +21,7 @@ let globalData = {
         currentTerrainIndex: -1,
         editzone: {
             camera: { x: 0, y: 0, scale: 1 },
-            selected: null,
+            selectedRectIndex: -1,
         },
     },
 };
@@ -48,11 +48,21 @@ let UI = {
     openTerrainBtn: ["Open terrain...", 10, 90, 190, 25],
     saveTerrainBtn: ["Save terrain", 10, 120, 190, 25],
 
-    loadImageTerrainBtn: ["Load image for terrain", 10, 160, 190, 25],
-    undoTerrainBtn: ["Undo", 10, 190, 92.5, 25],
-    redoTerrainBtn: ["Redo", 107.5, 190, 92.5, 25],
-    newRectBtn: [],
-    goToCenterTerrainBtn: ["Reset camera", 10, 250, 92.5, 25],
+    loadImageTerrainBtn: ["Load image...", 10, 160, 92.5, 25],
+    goToCenterTerrainBtn: ["Reset camera", 107.5, 160, 92.5, 25],
+    createTerrainBtn: ["Create block", 10, 190, 92.5, 25, false, null, "green"],
+    deleteTerrainBtn: [
+        "Delete selected",
+        107.5,
+        190,
+        92.5,
+        25,
+        false,
+        null,
+        "red",
+    ],
+    undoTerrainBtn: ["Undo", 10, 220, 92.5, 25],
+    redoTerrainBtn: ["Redo", 107.5, 220, 92.5, 25],
 };
 
 function setup() {
@@ -143,6 +153,35 @@ function mouseWheel(event) {
     // zoom in/out map editor
 }
 
+function keyPressed() {
+    if (globalData.terraintab.editzone.selectedRectIndex) {
+        let { selectedRectIndex } = globalData.terraintab.editzone;
+
+        // get selected rect
+        let selectedRect =
+            globalData.maptab.listTerrains.data[
+                globalData.terraintab.currentTerrainIndex
+            ][selectedRectIndex];
+
+        if (keyCode == LEFT_ARROW) {
+            selectedRect.x--;
+        }
+
+        if (keyCode == RIGHT_ARROW) {
+            selectedRect.x++;
+        }
+
+        if (keyCode == UP_ARROW) {
+            selectedRect.y--;
+        }
+
+        if (keyCode == DOWN_ARROW) {
+            selectedRect.y++;
+        }
+    }
+}
+
+// --------------- draw methods ---------------
 function drawModeTerrain() {
     // ---------- editor zone ----------
     drawEditTerrainZone(...UI.terrainEditorZone);
@@ -163,6 +202,18 @@ function drawModeTerrain() {
 
     if (button(...UI.loadImageTerrainBtn)) {
         console.log("load image");
+    }
+
+    if (button(...UI.createTerrainBtn)) {
+        console.log("create terrain");
+    }
+
+    if (button(...UI.deleteTerrainBtn)) {
+        if (window.confirm("Are you sure want to delete selected block")) {
+            globalData.maptab.listTerrains.data[
+                globalData.terraintab.currentTerrainIndex
+            ].rects.splice(globalData.terraintab.editzone.selectedRectIndex, 1);
+        }
     }
 
     if (button(...UI.undoTerrainBtn)) {
@@ -223,7 +274,7 @@ function drawModeMap() {
 }
 
 function drawEditTerrainZone(x, y, w, h) {
-    fill("#555");
+    fill("#333");
     rect(x, y, w, h);
 
     let index = globalData.terraintab.currentTerrainIndex;
@@ -232,12 +283,15 @@ function drawEditTerrainZone(x, y, w, h) {
 
         if (terrain) {
             // edit zone
-            let { camera } = globalData.terraintab.editzone;
+            let { camera, selectedRectIndex } = globalData.terraintab.editzone;
+
+            // flags
+            let dragging = null;
+            let hovered = false;
 
             // rects
             fill("#ddd9");
-            let dragging = null;
-            let hovered = false;
+            strokeWeight(1);
 
             for (let i = 0; i < terrain.rects.length; i++) {
                 let r = terrain.rects[i];
@@ -247,6 +301,7 @@ function drawEditTerrainZone(x, y, w, h) {
                 let rw = r.w * camera.scale;
                 let rh = r.h * camera.scale;
 
+                // hight light on hover
                 if (!hovered && isMouseInRect(rx, ry, rw, rh)) {
                     stroke("red");
                     hovered = true;
@@ -254,6 +309,18 @@ function drawEditTerrainZone(x, y, w, h) {
                     stroke("white");
                 }
 
+                // hight light selected rect
+                if (selectedRectIndex == i) {
+                    stroke("yellow");
+                    strokeWeight(2);
+                }
+
+                // select rect
+                if (isMouseInRect(rx, ry, rw, rh) && isMousePressed()) {
+                    globalData.terraintab.editzone.selectedRectIndex = i;
+                }
+
+                // draw dragable rectangle
                 draggableRect(rx, ry, rw, rh, (deltaX, deltaY) => {
                     if (!dragging) {
                         r.x = round(r.x + deltaX / camera.scale);
@@ -265,7 +332,6 @@ function drawEditTerrainZone(x, y, w, h) {
             }
 
             // grid
-            // for(let gx = 0; gx > )
 
             // center point
             fill("red");
@@ -281,7 +347,7 @@ function drawEditTerrainZone(x, y, w, h) {
 }
 
 function drawEditMapZone(x, y, w, h) {
-    fill("#555");
+    fill("#333");
     rect(x, y, w, h);
 }
 
