@@ -6,7 +6,7 @@ let mode = MODE.MAP;
 let pMouseIsPressed;
 let stats;
 
-let setting = {
+let globalData = {
     maptab: {
         listTerrains: {
             itemIndex: 0,
@@ -14,15 +14,45 @@ let setting = {
             data: TERRAIN_MAP.SUMMORNER_RIFT,
         },
         editzone: {
-            camera: { x: 0, y: 0 },
+            camera: { x: 0, y: 0, scale: 1 },
         },
     },
     terraintab: {
         currentTerrainIndex: -1,
         editzone: {
-            camera: { x: 0, y: 0 },
+            camera: { x: 0, y: 0, scale: 1 },
+            selected: null,
         },
     },
+};
+
+let UI = {
+    // map tab
+    menuMapZone: [5, 40, 200, 555],
+    mapEditorZone: [210, 45, 585, 550],
+    tabMapBtn: ["Map", 105, 10, 100, 30],
+    newMapBtn: ["New map", 10, 60, 190, 25],
+    openMapBtn: ["Open map...", 10, 90, 190, 25],
+    saveMapBtn: ["Save map", 10, 120, 190, 25],
+    undoMapBtn: ["Undo", 10, 160, 92.5, 25],
+    redoMapBtn: ["Redo", 107.5, 160, 92.5, 25],
+
+    listTerrainsZoneTitle: "List terrains:",
+    listTerrainsZone: [10, 235, 190, 355],
+
+    // terrain tab
+    menuTerrainZone: [5, 40, 200, 555],
+    terrainEditorZone: [210, 45, 585, 550],
+    tabTerrainBtn: ["Terrain", 5, 10, 100, 30],
+    newTerrainBtn: ["New terrain", 10, 60, 190, 25],
+    openTerrainBtn: ["Open terrain...", 10, 90, 190, 25],
+    saveTerrainBtn: ["Save terrain", 10, 120, 190, 25],
+
+    loadImageTerrainBtn: ["Load image for terrain", 10, 160, 190, 25],
+    undoTerrainBtn: ["Undo", 10, 190, 92.5, 25],
+    redoTerrainBtn: ["Redo", 107.5, 190, 92.5, 25],
+    newRectBtn: [],
+    goToCenterTerrainBtn: ["Reset camera", 10, 250, 92.5, 25],
 };
 
 function setup() {
@@ -33,8 +63,8 @@ function setup() {
     stats.showPanel(0);
     document.body.appendChild(stats.dom);
 
-    setting.terraintab.editzone.camera.x = width / 2;
-    setting.terraintab.editzone.camera.y = height / 2;
+    resetCamera(globalData.terraintab.editzone.camera);
+    resetCamera(globalData.maptab.editzone.camera);
 }
 
 function draw() {
@@ -55,15 +85,15 @@ function draw() {
     fill(30);
     rect(0, 0, width, 40);
 
-    if (button("Terrain", 5, 10, 100, 30, mode == MODE.TERRAIN)) {
+    if (button(...UI.tabTerrainBtn, mode == MODE.TERRAIN)) {
         mode = MODE.TERRAIN;
     }
-    if (button("Map", 105, 10, 100, 30, mode == MODE.MAP)) {
+    if (button(...UI.tabMapBtn, mode == MODE.MAP)) {
         mode = MODE.MAP;
     }
 
     fill("white");
-    text("LOL2D MAP EDITOR", width / 2 + 100, 20);
+    text("LOL2D MAP EDITOR", width / 2 + UI.menuTerrainZone[2] / 2, 20);
 
     // input
     pMouseIsPressed = mouseIsPressed;
@@ -79,112 +109,151 @@ function draw() {
 function mouseDragged() {
     // if (keyIsDown(32)) {
     if (mode == MODE.TERRAIN) {
-        setting.terraintab.editzone.camera.x += movedX;
-        setting.terraintab.editzone.camera.y += movedY;
+        globalData.terraintab.editzone.camera.x += movedX;
+        globalData.terraintab.editzone.camera.y += movedY;
     } else {
-        setting.maptab.editzone.camera.x += movedX;
-        setting.maptab.editzone.camera.y += movedY;
+        globalData.maptab.editzone.camera.x += movedX;
+        globalData.maptab.editzone.camera.y += movedY;
     }
     // }
 }
 
-function drawModeTerrain() {
-    // ---------- background ----------
-    fill("#333");
-    rect(0, 40, width, height - 40 - 5);
+function mouseWheel(event) {
+    // scroll list terrains
+    if (mode == MODE.MAP && isMouseInRect(...UI.listTerrainsZone)) {
+        const { itemIndex, itemPerPage, data } = globalData.maptab.listTerrains;
 
+        if (event.delta > 0) {
+            let isEndOfList = itemIndex >= data.length - itemPerPage;
+            if (!isEndOfList) globalData.maptab.listTerrains.itemIndex++;
+        } else {
+            if (itemIndex > 0) globalData.maptab.listTerrains.itemIndex--;
+        }
+    }
+
+    // zoom in/out terrain editor
+    if (mode == MODE.TERRAIN && isMouseInRect(...UI.terrainEditorZone)) {
+        let { camera } = globalData.terraintab.editzone;
+
+        // camera.scale -= (camera.scale / 10) * (event.delta > 0 ? 1 : -2);
+        zoomBy(camera, event.delta);
+    }
+
+    // zoom in/out map editor
+}
+
+function drawModeTerrain() {
     // ---------- editor zone ----------
-    drawEditTerrainZone(210, 45, width - 210 - 5, height - 45 - 5);
+    drawEditTerrainZone(...UI.terrainEditorZone);
 
     // ---------- menu zone ----------
     fill("#333");
     noStroke();
-    rect(5, 40, 200, height - 40 - 5);
+    rect(...UI.menuTerrainZone);
 
     // buttons
-    if (button("New terrain", 10, 60, 190, 25)) {
+    if (button(...UI.newTerrainBtn)) {
         console.log("new");
     }
 
-    if (button("Open terrain", 10, 90, 190, 25)) {
+    if (button(...UI.openTerrainBtn)) {
         console.log("open");
     }
 
-    if (button("Load Image for terrain", 10, 120, 190, 25)) {
+    if (button(...UI.loadImageTerrainBtn)) {
         console.log("load image");
     }
 
-    if (button("Undo", 10, 150, 92.5, 25)) {
+    if (button(...UI.undoTerrainBtn)) {
         console.log("undo");
     }
 
-    if (button("Redo", 107.5, 150, 92.5, 25)) {
+    if (button(...UI.redoTerrainBtn)) {
         console.log("redo");
     }
 
-    if (button("Save terrain", 10, 200, 190, 25)) {
+    if (button(...UI.saveTerrainBtn)) {
         console.log("save");
+    }
+
+    if (button(...UI.goToCenterTerrainBtn)) {
+        resetCamera(globalData.terraintab.editzone.camera);
     }
 }
 
 function drawModeMap() {
-    // ---------- background ----------
-    fill("#333");
-    rect(0, 40, width, height - 40 - 5);
-
     // ---------- editor zone ----------
-    drawEditMapZone(210, 45, width - 210 - 5, height - 45 - 5);
+    drawEditMapZone(...UI.mapEditorZone);
 
     // ---------- menu zone ----------
     fill("#333");
-    rect(5, 40, 200, height - 40 - 5);
+    rect(...UI.menuMapZone);
 
     // buttons
-    if (button("New map", 10, 60, 190, 25)) {
+    if (button(...UI.newMapBtn)) {
         console.log("new");
     }
 
-    if (button("Open map", 10, 90, 190, 25)) {
+    if (button(...UI.openMapBtn)) {
         console.log("open");
     }
 
-    if (button("Undo", 10, 120, 92.5, 25)) {
+    if (button(...UI.undoMapBtn)) {
         console.log("undo");
     }
 
-    if (button("Redo", 107.5, 120, 92.5, 25)) {
+    if (button(...UI.redoMapBtn)) {
         console.log("redo");
     }
 
-    if (button("Save map", 10, 170, 190, 25)) {
+    if (button(...UI.saveMapBtn)) {
         console.log("save");
     }
 
     // terrains zone
     fill("white");
-    text("List Terrains: ", 45, 220);
+    text(
+        UI.listTerrainsZoneTitle,
+        UI.listTerrainsZone[0] + textWidth(UI.listTerrainsZoneTitle) / 2,
+        UI.listTerrainsZone[1] - 15
+    );
 
-    listScrollTerrains(10, 235, 190, 355);
+    listScrollTerrains(...UI.listTerrainsZone);
 }
 
 function drawEditTerrainZone(x, y, w, h) {
     fill("#555");
     rect(x, y, w, h);
 
-    let index = setting.terraintab.currentTerrainIndex;
+    let index = globalData.terraintab.currentTerrainIndex;
     if (index >= 0) {
-        let terrain = setting.maptab.listTerrains.data[index];
+        let terrain = globalData.maptab.listTerrains.data[index];
 
         if (terrain) {
             // edit zone
+            const { camera } = globalData.terraintab.editzone;
+            let cx = camera.x + x / 2;
+            let cy = camera.y + y / 2;
+
+            // rects
             fill("gray");
             stroke("white");
-
-            const { camera } = setting.terraintab.editzone;
-
             for (let r of terrain.rects) {
-                rect(r.x + x + camera.x, r.y + y + camera.y, r.w, r.h);
+                rect(
+                    r.x * camera.scale + cx,
+                    r.y * camera.scale + cy,
+                    r.w * camera.scale,
+                    r.h * camera.scale
+                );
             }
+
+            // grid
+            // for(let gx = 0; gx > )
+
+            // center point
+            fill("red");
+            noStroke();
+            circle(cx, cy, 5);
 
             // terrain name
             fill("white");
@@ -199,23 +268,24 @@ function drawEditMapZone(x, y, w, h) {
     rect(x, y, w, h);
 }
 
-// helpers
+// ---------- helpers ----------
+// scroll list
 function listScrollTerrains(x, y, w, h) {
     // background
     fill("#111");
     rect(x, y, w, h);
 
     // data
-    const { itemIndex, itemPerPage, data } = setting.maptab.listTerrains;
+    const { itemIndex, itemPerPage, data } = globalData.maptab.listTerrains;
 
     // buttons
     if (button("Scroll Up ↑", x, y, w, 20, itemIndex == 0)) {
-        if (itemIndex > 0) setting.maptab.listTerrains.itemIndex--;
+        if (itemIndex > 0) globalData.maptab.listTerrains.itemIndex--;
     }
 
     let isEndOfList = itemIndex >= data.length - itemPerPage;
     if (button("Scroll Down ↓", x, y + h - 20, w, 20, isEndOfList)) {
-        if (!isEndOfList) setting.maptab.listTerrains.itemIndex++;
+        if (!isEndOfList) globalData.maptab.listTerrains.itemIndex++;
     }
 
     // list terrains
@@ -227,20 +297,6 @@ function listScrollTerrains(x, y, w, h) {
         let terrainX = x;
         let terrainY = y + (i - itemIndex) * terrainH + 20;
         renderTerrainItem(i, data[i], terrainX, terrainY, terrainW, terrainH);
-    }
-}
-
-function mouseWheel(event) {
-    // scroll list terrains
-    if (mode == MODE.MAP && isMouseInRect(10, 235, 190, 355)) {
-        const { itemIndex, itemPerPage, data } = setting.maptab.listTerrains;
-
-        if (event.delta > 0) {
-            let isEndOfList = itemIndex >= data.length - itemPerPage;
-            if (!isEndOfList) setting.maptab.listTerrains.itemIndex++;
-        } else {
-            if (itemIndex > 0) setting.maptab.listTerrains.itemIndex--;
-        }
     }
 }
 
@@ -305,11 +361,12 @@ function renderTerrainItem(index, terrain, x, y, w, h) {
                     `Are you sure want to delete this terrain index: ${index}, name: ${terrain.name}`
                 )
             )
-                setting.maptab.listTerrains.data.splice(index, 1);
+                globalData.maptab.listTerrains.data.splice(index, 1);
         }
         if (button("Edit", x + 56, y + h - 20, 50, 20, false, "#9995")) {
             mode = MODE.TERRAIN;
-            setting.terraintab.currentTerrainIndex = index;
+            globalData.terraintab.editzone.camera;
+            globalData.terraintab.currentTerrainIndex = index;
         }
         if (
             button("Add to map →", x + 106, y + h - 20, 83, 20, false, "#9995")
@@ -323,6 +380,7 @@ function renderTerrainItem(index, terrain, x, y, w, h) {
     }
 }
 
+// button
 function button(t, x, y, w, h, isActive, bgColor, hoverColor, activeColor) {
     let isHover = isMouseInRect(x, y, w, h);
 
@@ -357,10 +415,39 @@ function isMouseInRect(x, y, w, h) {
     return mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h;
 }
 
+// mouse event
 function isMousePressed() {
     return !pMouseIsPressed && mouseIsPressed;
 }
 
 function isMouseReleased() {
     return pMouseIsPressed && !mouseIsPressed;
+}
+
+// camera
+
+function resetCamera(camera) {
+    camera.scale = 1;
+    camera.x = width / 2;
+    camera.y = height / 2;
+}
+
+// source: https://github.com/HoangTran0410/ImageToSpriteJson/blob/db1f19ec11ba899e71dff1af31f656495d5a7281/main.js#L197
+function zoomTo(camera, _ratio) {
+    let ratio = max(0.5, _ratio);
+
+    let tiLe = ratio / camera.scale;
+
+    camera.scale = ratio;
+
+    let mx = mouseX - UI.terrainEditorZone[0];
+    let my = mouseY - UI.terrainEditorZone[1];
+
+    // Zoom from the triggering point of the event
+    camera.x = mx + (camera.x - mx) * tiLe;
+    camera.y = my + (camera.y - my) * tiLe;
+}
+
+function zoomBy(camera, value) {
+    zoomTo(camera, camera.scale + (value > 0 ? -0.1 : 0.1));
 }
