@@ -1,5 +1,5 @@
 const MODE = {
-    BLOCK: "Block",
+    TERRAIN: "Terrain",
     MAP: "Map",
 };
 let mode = MODE.MAP;
@@ -8,7 +8,7 @@ let stats;
 
 let setting = {
     maptab: {
-        listBlocks: {
+        listTerrains: {
             itemIndex: 0,
             itemPerPage: 2,
             data: TERRAIN_MAP.SUMMORNER_RIFT,
@@ -17,8 +17,8 @@ let setting = {
             camera: { x: 0, y: 0 },
         },
     },
-    blocktab: {
-        currentBlockIndex: -1,
+    terraintab: {
+        currentTerrainIndex: -1,
         editzone: {
             camera: { x: 0, y: 0 },
         },
@@ -33,8 +33,8 @@ function setup() {
     stats.showPanel(0);
     document.body.appendChild(stats.dom);
 
-    setting.blocktab.editzone.camera.x = width / 2;
-    setting.blocktab.editzone.camera.y = height / 2;
+    setting.terraintab.editzone.camera.x = width / 2;
+    setting.terraintab.editzone.camera.y = height / 2;
 }
 
 function draw() {
@@ -45,8 +45,8 @@ function draw() {
     cursor(ARROW); // reset cursor
 
     // body
-    if (mode == MODE.BLOCK) {
-        drawModeBlock();
+    if (mode == MODE.TERRAIN) {
+        drawModeTerrain();
     } else {
         drawModeMap();
     }
@@ -55,8 +55,8 @@ function draw() {
     fill(30);
     rect(0, 0, width, 40);
 
-    if (button("Block", 5, 10, 100, 30, mode == MODE.BLOCK)) {
-        mode = MODE.BLOCK;
+    if (button("Terrain", 5, 10, 100, 30, mode == MODE.TERRAIN)) {
+        mode = MODE.TERRAIN;
     }
     if (button("Map", 105, 10, 100, 30, mode == MODE.MAP)) {
         mode = MODE.MAP;
@@ -78,9 +78,9 @@ function draw() {
 
 function mouseDragged() {
     // if (keyIsDown(32)) {
-    if (mode == MODE.BLOCK) {
-        setting.blocktab.editzone.camera.x += movedX;
-        setting.blocktab.editzone.camera.y += movedY;
+    if (mode == MODE.TERRAIN) {
+        setting.terraintab.editzone.camera.x += movedX;
+        setting.terraintab.editzone.camera.y += movedY;
     } else {
         setting.maptab.editzone.camera.x += movedX;
         setting.maptab.editzone.camera.y += movedY;
@@ -88,13 +88,13 @@ function mouseDragged() {
     // }
 }
 
-function drawModeBlock() {
+function drawModeTerrain() {
     // ---------- background ----------
     fill("#333");
     rect(0, 40, width, height - 40 - 5);
 
     // ---------- editor zone ----------
-    drawEditBlockZone(210, 45, width - 210 - 5, height - 45 - 5);
+    drawEditTerrainZone(210, 45, width - 210 - 5, height - 45 - 5);
 
     // ---------- menu zone ----------
     fill("#333");
@@ -102,15 +102,15 @@ function drawModeBlock() {
     rect(5, 40, 200, height - 40 - 5);
 
     // buttons
-    if (button("New block", 10, 60, 190, 25)) {
+    if (button("New terrain", 10, 60, 190, 25)) {
         console.log("new");
     }
 
-    if (button("Open block", 10, 90, 190, 25)) {
+    if (button("Open terrain", 10, 90, 190, 25)) {
         console.log("open");
     }
 
-    if (button("Load Image for block", 10, 120, 190, 25)) {
+    if (button("Load Image for terrain", 10, 120, 190, 25)) {
         console.log("load image");
     }
 
@@ -122,7 +122,7 @@ function drawModeBlock() {
         console.log("redo");
     }
 
-    if (button("Save block", 10, 200, 190, 25)) {
+    if (button("Save terrain", 10, 200, 190, 25)) {
         console.log("save");
     }
 }
@@ -160,36 +160,36 @@ function drawModeMap() {
         console.log("save");
     }
 
-    // blocks zone
+    // terrains zone
     fill("white");
-    text("List Blocks: ", 45, 220);
+    text("List Terrains: ", 45, 220);
 
-    listScrollBlocks(10, 235, 190, 355);
+    listScrollTerrains(10, 235, 190, 355);
 }
 
-function drawEditBlockZone(x, y, w, h) {
+function drawEditTerrainZone(x, y, w, h) {
     fill("#555");
     rect(x, y, w, h);
 
-    let index = setting.blocktab.currentBlockIndex;
+    let index = setting.terraintab.currentTerrainIndex;
     if (index >= 0) {
-        let block = setting.maptab.listBlocks.data[index];
+        let terrain = setting.maptab.listTerrains.data[index];
 
-        if (block) {
+        if (terrain) {
             // edit zone
             fill("gray");
             stroke("white");
 
-            const { camera } = setting.blocktab.editzone;
+            const { camera } = setting.terraintab.editzone;
 
-            for (let r of block.rects) {
+            for (let r of terrain.rects) {
                 rect(r.x + x + camera.x, r.y + y + camera.y, r.w, r.h);
             }
 
-            // block name
+            // terrain name
             fill("white");
             noStroke();
-            text(`Block: ${index} - ${block.name}`, x + w / 2, y + 10);
+            text(`Terrain: ${index} - ${terrain.name}`, x + w / 2, y + 10);
         }
     }
 }
@@ -200,51 +200,51 @@ function drawEditMapZone(x, y, w, h) {
 }
 
 // helpers
-function listScrollBlocks(x, y, w, h) {
+function listScrollTerrains(x, y, w, h) {
     // background
     fill("#111");
     rect(x, y, w, h);
 
     // data
-    const { itemIndex, itemPerPage, data } = setting.maptab.listBlocks;
+    const { itemIndex, itemPerPage, data } = setting.maptab.listTerrains;
 
     // buttons
     if (button("Scroll Up ↑", x, y, w, 20, itemIndex == 0)) {
-        if (itemIndex > 0) setting.maptab.listBlocks.itemIndex--;
+        if (itemIndex > 0) setting.maptab.listTerrains.itemIndex--;
     }
 
     let isEndOfList = itemIndex >= data.length - itemPerPage;
     if (button("Scroll Down ↓", x, y + h - 20, w, 20, isEndOfList)) {
-        if (!isEndOfList) setting.maptab.listBlocks.itemIndex++;
+        if (!isEndOfList) setting.maptab.listTerrains.itemIndex++;
     }
 
-    // list blocks
-    let blockW = w;
-    let blockH = (h - 40) / itemPerPage;
+    // list terrains
+    let terrainW = w;
+    let terrainH = (h - 40) / itemPerPage;
     let index2 = min(data.length, itemIndex + itemPerPage);
 
     for (let i = itemIndex; i < index2; i++) {
-        let blockX = x;
-        let blockY = y + (i - itemIndex) * blockH + 20;
-        renderBlockItem(i, data[i], blockX, blockY, blockW, blockH);
+        let terrainX = x;
+        let terrainY = y + (i - itemIndex) * terrainH + 20;
+        renderTerrainItem(i, data[i], terrainX, terrainY, terrainW, terrainH);
     }
 }
 
 function mouseWheel(event) {
-    // scroll list blocks
+    // scroll list terrains
     if (mode == MODE.MAP && isMouseInRect(10, 235, 190, 355)) {
-        const { itemIndex, itemPerPage, data } = setting.maptab.listBlocks;
+        const { itemIndex, itemPerPage, data } = setting.maptab.listTerrains;
 
         if (event.delta > 0) {
             let isEndOfList = itemIndex >= data.length - itemPerPage;
-            if (!isEndOfList) setting.maptab.listBlocks.itemIndex++;
+            if (!isEndOfList) setting.maptab.listTerrains.itemIndex++;
         } else {
-            if (itemIndex > 0) setting.maptab.listBlocks.itemIndex--;
+            if (itemIndex > 0) setting.maptab.listTerrains.itemIndex--;
         }
     }
 }
 
-function renderBlockItem(index, block, x, y, w, h) {
+function renderTerrainItem(index, terrain, x, y, w, h) {
     // background
     stroke("white");
     noFill();
@@ -256,7 +256,7 @@ function renderBlockItem(index, block, x, y, w, h) {
         right = -Infinity,
         bottom = -Infinity;
 
-    for (let p of block.rects) {
+    for (let p of terrain.rects) {
         top = min(p.y, top);
         bottom = max(p.y + p.h, bottom);
         left = min(p.x, left);
@@ -270,7 +270,7 @@ function renderBlockItem(index, block, x, y, w, h) {
 
     // draw shape
     fill("gray");
-    for (let r of block.rects) {
+    for (let r of terrain.rects) {
         rect(
             r.x * scaleRatio + x + w / 2,
             r.y * scaleRatio + y + h / 2,
@@ -288,7 +288,7 @@ function renderBlockItem(index, block, x, y, w, h) {
     fill("white");
     noStroke();
 
-    let title = index + " - " + block.name;
+    let title = index + " - " + terrain.name;
     text(title, x + textWidth(title) / 2 + 10, y + 10);
 
     let size = W + " x " + H;
@@ -302,14 +302,14 @@ function renderBlockItem(index, block, x, y, w, h) {
         ) {
             if (
                 window.confirm(
-                    `Are you sure want to delete this block index: ${index}, name: ${block.name}`
+                    `Are you sure want to delete this terrain index: ${index}, name: ${terrain.name}`
                 )
             )
-                setting.maptab.listBlocks.data.splice(index, 1);
+                setting.maptab.listTerrains.data.splice(index, 1);
         }
         if (button("Edit", x + 56, y + h - 20, 50, 20, false, "#9995")) {
-            mode = MODE.BLOCK;
-            setting.blocktab.currentBlockIndex = index;
+            mode = MODE.TERRAIN;
+            setting.terraintab.currentTerrainIndex = index;
         }
         if (
             button("Add to map →", x + 106, y + h - 20, 83, 20, false, "#9995")
