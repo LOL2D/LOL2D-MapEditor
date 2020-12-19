@@ -28,7 +28,8 @@ const UI = {
     menuTerrainZone: [5, 40, 200, 655],
     terrainEditorZone: [205, 40, 790, 655],
     newTerrainBtn: ["New terrain +", 10, 60, 190, 25, 0, 0, "green"],
-    deleteTerrainBtn: ["Delete terrain", 10, 90, 190, 25, 0, 0, "red"],
+    deleteTerrainBtn: ["Delete", 10, 90, 92.5, 25, 0, 0, "red"],
+    renameTerrainBtn: ["Rename", 107.5, 90, 92.5, 25],
     importTerrainBtn: ["Import..", 10, 120, 92.5, 25, 0, 0, "black"],
     exportTerrainBtn: ["Export..", 107.5, 120, 92.5, 25, 0, 0, "black"],
 

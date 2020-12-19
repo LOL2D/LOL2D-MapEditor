@@ -249,6 +249,18 @@ function listScrollTerrains(title, x, y, w, h) {
         scollListTerrainItems(1);
     }
 
+    // selected arrow hint
+    let selectedTerrainIndex = getSelectedTerrainIndex();
+    if (selectedTerrainIndex >= 0) {
+        if (selectedTerrainIndex < itemIndex) {
+            fill("yellow");
+            text("selected ↑", x + w - 40, y + 30);
+        } else if (selectedTerrainIndex >= itemIndex + itemPerPage) {
+            fill("yellow");
+            text("selected ↓", x + w - 40, y + h - 30);
+        }
+    }
+
     // list terrains
     let itemW = w;
     let itemH = (h - 40) / itemPerPage;
@@ -264,10 +276,17 @@ function listScrollTerrains(title, x, y, w, h) {
 }
 
 function renderTerrainItem(index, terrain, x, y, w, h) {
+    let selectedTerrainIndex = getSelectedTerrainIndex();
+
     // background
     noFill();
-    stroke("gray");
-    strokeWeight(1);
+    if (selectedTerrainIndex == index) {
+        stroke("yellow");
+        strokeWeight(2);
+    } else {
+        stroke("gray");
+        strokeWeight(1);
+    }
     rect(x, y, w, h);
 
     // scale up/down to fit item container
@@ -309,6 +328,10 @@ function renderTerrainItem(index, terrain, x, y, w, h) {
     if (isMouseInRect(x, y, w, h)) {
         let btnW = w / 3;
 
+        if (button("Clone", x, y + h - 40, btnW, 20, false, "#9995")) {
+            cloneTerrainAtIndex(index);
+        }
+
         if (button("Delete", x, y + h - 20, btnW, 20, 0, "#9995", "red")) {
             deleteTerrainAtIndexConfirm(index);
         }
@@ -318,7 +341,7 @@ function renderTerrainItem(index, terrain, x, y, w, h) {
         }
 
         if (button("Locate", x + btnW * 2, y + h - 20, btnW, 20, 0, "#9995")) {
-            centerMapCameraToTerrainIndex(index);
+            locateTerrainIndex(index);
         }
     }
 }
@@ -339,6 +362,10 @@ function drawMenuTerrain() {
     if (getEditingTerrain()) {
         if (button(...UI.deleteTerrainBtn)) {
             deleteEditingTerrainConfirm();
+        }
+
+        if (button(...UI.renameTerrainBtn)) {
+            renameEditingTerrain();
         }
 
         if (button(...UI.importTerrainBtn)) {

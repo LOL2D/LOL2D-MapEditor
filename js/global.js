@@ -58,13 +58,15 @@ function resetMapCamera() {
     resetCamera(getMapCamera());
 }
 
-function centerMapCameraToTerrainIndex(index) {
+function locateTerrainIndex(index) {
     let terrain = getTerrainAtIndex(index);
     let camera = getMapCamera();
 
     camera.scaleTo = 1;
     camera.xTo = -terrain.position.x + width / 2;
     camera.yTo = -terrain.position.y + height / 2;
+
+    setSelectedTerrainIndex(index);
 }
 
 // ----------------------- drag event -----------------------
@@ -165,6 +167,11 @@ function exportMap(format) {
     });
 }
 
+function editTerrainAtIndex(index) {
+    resetTerrainCamera();
+    setEditingTerrainIndex(index);
+}
+
 // ----------------------- terrain -----------------------
 function getEditingTerrainIndex() {
     return globalData.terraintab.currentTerrainIndex;
@@ -206,9 +213,52 @@ function newTerrain(successCallback) {
     });
 }
 
-function editTerrainAtIndex(index) {
-    resetTerrainCamera();
-    setEditingTerrainIndex(index);
+function cloneTerrainAtIndex(index) {
+    let terrain = { ...getTerrainAtIndex(index) };
+
+    Swal.fire({
+        title: "Clone terrain",
+        text: "Name of new terrain:",
+        input: "text",
+        inputValue: terrain.name,
+        showCancelButton: true,
+        confirmButtonText: `Clone`,
+        denyButtonText: `Cancel`,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            terrain.name = result.value;
+            terrain.position.x = 0;
+            terrain.position.y = 0;
+
+            globalData.maptab.listTerrains.splice(index, 0, terrain);
+            setEditingTerrainIndex(index);
+
+            locateTerrainIndex(index);
+        }
+    });
+}
+
+function cloneEditingTerrain() {}
+
+function renameTerrainAtIndex(index) {
+    let terrain = getTerrainAtIndex(index);
+
+    Swal.fire({
+        title: "Rename terrain",
+        input: "text",
+        inputLabel: "New name",
+        inputValue: terrain.name,
+        showCancelButton: true,
+        confirmButtonText: "Rename it",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            terrain.name = result.value;
+        }
+    });
+}
+
+function renameEditingTerrain() {
+    renameTerrainAtIndex(getEditingTerrainIndex());
 }
 
 function deleteTerrainAtIndexConfirm(index) {
