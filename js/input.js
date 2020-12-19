@@ -39,7 +39,7 @@ function mouseDragged() {
 
 function mouseWheel(event) {
     // scroll list terrains
-    if (mode == MODE.MAP && isMouseInRect(...UI.listTerrainsZone)) {
+    if (mode == MODE.MAP && isMouseInRect(...UI.listTerrainsSroll.slice(1))) {
         scollListTerrainItems(event.delta);
     }
 

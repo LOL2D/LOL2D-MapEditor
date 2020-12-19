@@ -2,8 +2,9 @@ let mode = MODE.MAP;
 let stats;
 
 function setup() {
-    createCanvas(800, 600).id("game-canvas");
+    createCanvas(UI.cnvWidth, UI.cnvHeight).id("game-canvas");
     textAlign(CENTER, CENTER);
+    textFont("Consolas", 13);
     imageMode(CENTER);
     preventRightClick("game-canvas");
 
@@ -35,7 +36,7 @@ function draw() {
     stats.end();
 }
 
-// --------------- draw methods ---------------
+// --------------- draw methods ----------------
 function drawHeader(t) {
     fill(30);
     rect(0, 0, width, 40);
@@ -51,7 +52,9 @@ function drawHeader(t) {
     text(t, width / 2 + UI.menuTerrainZone[2] / 2, 20);
 }
 
-// map editor
+// =============================================
+// ================= map editor ================
+// =============================================
 function drawModeMap() {
     // ---------- editor zone ----------
     drawEditMapZone(...UI.mapEditorZone);
@@ -70,18 +73,11 @@ function drawModeMap() {
     }
 
     if (button(...UI.exportMapBtn)) {
-        console.log("export");
+        exportMap();
     }
 
     // terrains zone
-    fill("white");
-    text(
-        UI.listTerrainsZoneTitle,
-        UI.listTerrainsZone[0] + textWidth(UI.listTerrainsZoneTitle) / 2,
-        UI.listTerrainsZone[1] - 15
-    );
-
-    listScrollTerrains(...UI.listTerrainsZone);
+    listScrollTerrains(...UI.listTerrainsSroll);
 }
 
 function drawEditMapZone(x, y, w, h) {
@@ -89,7 +85,117 @@ function drawEditMapZone(x, y, w, h) {
     rect(x, y, w, h);
 }
 
-// terrain editor
+function listScrollTerrains(title, x, y, w, h) {
+    // background
+    fill("#111");
+    rect(x, y, w, h);
+
+    // data
+    let terrains = getListTerrains();
+    const { itemIndex, itemPerPage } = getScrollListTerrainsData();
+
+    // title
+    let t = title + `(${terrains.length})`;
+    fill("white");
+    text(t, x + textWidth(t) / 2, y - 15);
+
+    // buttons
+    if (button("New +", x + w - 50, y - 30, 50, 25, 0, 0, "green")) {
+        newTerrain(() => {
+            mode = MODE.TERRAIN;
+        });
+    }
+    if (button("Scroll Up ↑", x, y, w, 20, itemIndex == 0)) {
+        scollListTerrainItems(-1);
+    }
+
+    if (button("Scroll Down ↓", x, y + h - 20, w, 20, isEndOfListTerrains())) {
+        scollListTerrainItems(1);
+    }
+
+    // list terrains
+    let itemW = w;
+    let itemH = (h - 40) / itemPerPage;
+
+    for (let i = itemIndex; i < itemIndex + itemPerPage; i++) {
+        if (terrains[i]) {
+            let itemX = x;
+            let itemY = y + (i - itemIndex) * itemH + 20;
+
+            renderTerrainItem(i, terrains[i], itemX, itemY, itemW, itemH);
+        }
+    }
+}
+
+function renderTerrainItem(index, terrain, x, y, w, h) {
+    // background
+    stroke("white");
+    noFill();
+    rect(x, y, w, h);
+
+    // scale up/down to fit item container
+    let top = Infinity,
+        left = Infinity,
+        right = -Infinity,
+        bottom = -Infinity;
+
+    for (let p of terrain.rects) {
+        top = min(p.y, top);
+        bottom = max(p.y + p.h, bottom);
+        left = min(p.x, left);
+        right = max(p.x + p.w, right);
+    }
+
+    let W = abs(right) - abs(left) > 0 ? abs(right) * 2 : abs(left) * 2;
+    let H = abs(bottom) - abs(top) > 0 ? abs(bottom) * 2 : abs(top) * 2;
+
+    let scaleRatio = min(w, h) / max(W, H);
+
+    // draw shape
+    fill("#ddd9");
+    for (let r of terrain.rects) {
+        rect(
+            r.x * scaleRatio + x + w / 2,
+            r.y * scaleRatio + y + h / 2,
+            r.w * scaleRatio,
+            r.h * scaleRatio
+        );
+    }
+
+    // draw center point
+    fill("red");
+    noStroke();
+    circle(x + w / 2, y + h / 2, 5);
+
+    // title + size
+    fill("white");
+    noStroke();
+
+    let title = index + " - " + terrain.name;
+    text(title, x + textWidth(title) / 2 + 5, y + 10);
+
+    let size = W + " x " + H;
+    text(size, x + textWidth(size) / 2 + 5, y + 30);
+
+    // show buttons on hover list item
+    if (isMouseInRect(x, y, w, h)) {
+        if (button("Delete", x + 1, y + h - 20, 55, 20, 0, "#9995", "red")) {
+            deleteTerrainAtIndexConfirm(index);
+        }
+        if (button("Edit", x + 56, y + h - 20, 45, 20, false, "#9995")) {
+            mode = MODE.TERRAIN;
+            editTerrainAtIndex(index);
+        }
+
+        if (button("Add to map →", x + 101, y + h - 20, 88, 20, 0, "#9995")) {
+            console.log("add");
+        }
+    }
+}
+
+// =============================================
+// =============== terrain editor ==============
+// =============================================
 function drawModeTerrain() {
     // ---------- editor zone ----------
     drawEditTerrainZone(...UI.terrainEditorZone);
@@ -101,7 +207,7 @@ function drawModeTerrain() {
 
     // buttons
     if (button(...UI.newTerrainBtn)) {
-        console.log("new");
+        newTerrain();
     }
 
     if (getEditingTerrain()) {
@@ -131,8 +237,8 @@ function drawModeTerrain() {
             resetTerrainCamera();
         }
 
-        if (button(...UI.createRectBtn)) {
-            createRectForEditingTerrain();
+        if (button(...UI.newRectBtn)) {
+            newRect();
         }
 
         if (getSelectedRect()) {
@@ -247,105 +353,4 @@ function drawEditTerrainZone(x, y, w, h) {
         x + w / 2,
         y + 10
     );
-}
-
-// ---------- helpers ----------
-
-// scroll list
-function listScrollTerrains(x, y, w, h) {
-    // background
-    fill("#111");
-    rect(x, y, w, h);
-
-    // data
-    let terrains = getListTerrains();
-    const { itemIndex, itemPerPage } = getScrollListTerrainsData();
-
-    // buttons
-    if (button("Scroll Up ↑", x, y, w, 20, itemIndex == 0)) {
-        scollListTerrainItems(-1);
-    }
-
-    if (button("Scroll Down ↓", x, y + h - 20, w, 20, isEndOfListTerrains())) {
-        scollListTerrainItems(1);
-    }
-
-    // list terrains
-    let itemW = w;
-    let itemH = (h - 40) / itemPerPage;
-
-    for (let i = itemIndex; i < itemIndex + itemPerPage; i++) {
-        if (terrains[i]) {
-            let itemX = x;
-            let itemY = y + (i - itemIndex) * itemH + 20;
-
-            renderTerrainItem(i, terrains[i], itemX, itemY, itemW, itemH);
-        }
-    }
-}
-
-function renderTerrainItem(index, terrain, x, y, w, h) {
-    // background
-    stroke("white");
-    noFill();
-    rect(x, y, w, h);
-
-    // scale up/down to fit item container
-    let top = Infinity,
-        left = Infinity,
-        right = -Infinity,
-        bottom = -Infinity;
-
-    for (let p of terrain.rects) {
-        top = min(p.y, top);
-        bottom = max(p.y + p.h, bottom);
-        left = min(p.x, left);
-        right = max(p.x + p.w, right);
-    }
-
-    let W = abs(right) - abs(left) > 0 ? abs(right) * 2 : abs(left) * 2;
-    let H = abs(bottom) - abs(top) > 0 ? abs(bottom) * 2 : abs(top) * 2;
-
-    let scaleRatio = min(w, h) / max(W, H);
-
-    // draw shape
-    fill("#ddd9");
-    for (let r of terrain.rects) {
-        rect(
-            r.x * scaleRatio + x + w / 2,
-            r.y * scaleRatio + y + h / 2,
-            r.w * scaleRatio,
-            r.h * scaleRatio
-        );
-    }
-
-    // draw center point
-    fill("red");
-    noStroke();
-    circle(x + w / 2, y + h / 2, 5);
-
-    // title + size
-    fill("white");
-    noStroke();
-
-    let title = index + " - " + terrain.name;
-    text(title, x + textWidth(title) / 2 + 10, y + 10);
-
-    let size = W + " x " + H;
-    text(size, w - textWidth(size) / 2, y + 10);
-
-    // show buttons on hover list item
-    if (isMouseInRect(x, y, w, h)) {
-        if (button("Delete", x + 1, y + h - 20, 55, 20, 0, "#9995", "red")) {
-            deleteTerrainAtIndexConfirm(index);
-        }
-        if (button("Edit", x + 56, y + h - 20, 50, 20, false, "#9995")) {
-            mode = MODE.TERRAIN;
-            editTerrainAtIndex(index);
-        }
-
-        if (button("Add to map →", x + 106, y + h - 20, 83, 20, 0, "#9995")) {
-            console.log("add");
-        }
-    }
 }

@@ -7,7 +7,7 @@ let globalData = {
     maptab: {
         scrollList: {
             itemIndex: 0,
-            itemPerPage: 2,
+            itemPerPage: 3,
         },
         listTerrains: TERRAIN_MAP.SUMMORNER_RIFT,
         editzone: {
@@ -76,6 +76,32 @@ function dragMapCamera() {
     dragCamera(getMapCamera());
 }
 
+// ----------------------- map -----------------------
+function exportMap(format) {
+    let map = getListTerrains();
+    let data = format ? JSON.stringify(map, null, 4) : JSON.stringify(map);
+
+    Swal.fire({
+        title: "Map data" + (format ? " formatted" : ""),
+        icon: "success",
+        html: `
+            <p>
+                Select all and press Ctrl+C to copy or click 
+                <button onClick="copyToClipboard('mapdata')">Copy</button>
+            </p> 
+            <textarea id="mapdata" style="width: 100%; min-height: 350px">${data}</textarea>
+        `,
+        focusConfirm: false,
+        confirmButtonText: "Auto Format!",
+        showCancelButton: true,
+        cancelButtonText: "Close",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            exportMap(true);
+        }
+    });
+}
+
 // ----------------------- terrain -----------------------
 function getEditingTerrainIndex() {
     return globalData.terraintab.currentTerrainIndex;
@@ -93,6 +119,30 @@ function getTerrainAtIndex(index) {
     return globalData.maptab.listTerrains[index];
 }
 
+function newTerrain(successCallback) {
+    Swal.fire({
+        title: "Create new terrain",
+        text: "Name of terrain:",
+        input: "text",
+        showCancelButton: true,
+        confirmButtonText: `Create`,
+        denyButtonText: `Cancel`,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // add to begin of array
+            globalData.maptab.listTerrains.unshift({
+                name: result.value,
+                position: { x: 0, y: 0 },
+                rects: [],
+            });
+
+            setEditingTerrainIndex(0);
+
+            successCallback && successCallback();
+        }
+    });
+}
+
 function editTerrainAtIndex(index) {
     resetTerrainCamera();
     setEditingTerrainIndex(index);
@@ -100,12 +150,21 @@ function editTerrainAtIndex(index) {
 
 function deleteTerrainAtIndexConfirm(index) {
     let terrain = getTerrainAtIndex(index);
-    let t = `Are you sure want to delete this terrain index: ${index}, name: ${terrain.name}`;
 
-    if (window.confirm(t)) {
-        globalData.maptab.listTerrains.splice(index, 1);
-        setEditingTerrainIndex(-1);
-    }
+    Swal.fire({
+        title: "Delele terrain?",
+        text: `Are you sure want to delete this terrain? \n index: ${index}, name: ${terrain.name}`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            globalData.maptab.listTerrains.splice(index, 1);
+            setEditingTerrainIndex(-1);
+        }
+    });
 }
 
 function deleteEditingTerrainConfirm() {
@@ -113,10 +172,31 @@ function deleteEditingTerrainConfirm() {
     deleteTerrainAtIndexConfirm(index);
 }
 
-function exportEditingTerrainData() {
+function exportEditingTerrainData(format) {
     let terrain = getEditingTerrain();
-    let data = JSON.stringify(terrain);
-    window.prompt("Terrain data: (Ctrl+C to copy)", data);
+    let data = format
+        ? JSON.stringify(terrain, null, 4)
+        : JSON.stringify(terrain);
+
+    Swal.fire({
+        title: "Terrain data" + (format ? " formatted" : ""),
+        icon: "success",
+        html: `
+            <p>
+                Select all and press Ctrl+C to copy or click 
+                <button onClick="copyToClipboard('mapdata')">Copy</button>
+            </p> 
+            <textarea id="mapdata" style="width: 100%; min-height: 350px">${data}</textarea>
+        `,
+        focusConfirm: false,
+        confirmButtonText: "Auto Format!",
+        showCancelButton: true,
+        cancelButtonText: "Close",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            exportEditingTerrainData(true);
+        }
+    });
 }
 
 // ----------------------- rect -----------------------
@@ -136,44 +216,93 @@ function getRectAtIndex(index) {
     return getEditingTerrain()?.rects[index];
 }
 
-function createRectForEditingTerrain() {
-    let w = Number(window.prompt("width: "));
-    let h = Number(window.prompt("height: "));
+function newRect() {
+    Swal.fire({
+        title: "Create new rect",
+        input: "number",
+        inputLabel: "Width",
+        inputValue: 50,
+        showCancelButton: true,
+        confirmButtonText: `Next`,
+        denyButtonText: `Cancel`,
+    }).then((resultW) => {
+        if (resultW.isConfirmed) {
+            Swal.fire({
+                title: "Create new rect",
+                input: "number",
+                inputLabel: "Height",
+                inputValue: 50,
+                showCancelButton: true,
+                confirmButtonText: `Create`,
+                denyButtonText: `Cancel`,
+            }).then((resultH) => {
+                if (resultH.isConfirmed) {
+                    let w = Number(resultW.value) || 50;
+                    let h = Number(resultH.value) || 50;
 
-    if (w && h) {
-        getEditingTerrain().rects.push({
-            x: -w / 2,
-            y: -h / 2,
-            w,
-            h,
-        });
-    } else {
-        alert("Thêm không thành công, dữ liệu không đúng.");
-    }
+                    getEditingTerrain().rects.push({
+                        x: -w / 2,
+                        y: -h / 2,
+                        w,
+                        h,
+                    });
+                }
+            });
+        }
+    });
 }
 
 function editSelectedRect() {
     let selectedRect = getSelectedRect();
 
-    let w = Number(window.prompt("width: ", selectedRect.w));
-    let h = Number(window.prompt("height: ", selectedRect.h));
+    Swal.fire({
+        title: "Edit selected rect",
+        input: "number",
+        inputLabel: "Width",
+        inputValue: selectedRect.w,
+        showCancelButton: true,
+        confirmButtonText: `Next`,
+        denyButtonText: `Cancel`,
+    }).then((resultW) => {
+        if (resultW.isConfirmed) {
+            Swal.fire({
+                title: "Edit selected rect",
+                input: "number",
+                inputLabel: "Height",
+                inputValue: selectedRect.h,
+                showCancelButton: true,
+                confirmButtonText: `Create`,
+                denyButtonText: `Cancel`,
+            }).then((resultH) => {
+                if (resultH.isConfirmed) {
+                    let w = Number(resultW.value) || 50;
+                    let h = Number(resultH.value) || 50;
 
-    if (w && h) {
-        selectedRect.w = w;
-        selectedRect.h = h;
-    } else {
-        alert("Sửa không thành công, dữ liệu không đúng.");
-    }
+                    selectedRect.w = w;
+                    selectedRect.h = h;
+                }
+            });
+        }
+    });
 }
 
 function deleteSelectedRect() {
-    if (window.confirm("Are you sure want to delete selected rect")) {
-        // remove from array
-        getEditingTerrain().rects.splice(getSelectedRectIndex(), 1);
-
-        // reset selected index
-        setSelectedRectIndex(-1);
-    }
+    Swal.fire({
+        title: "Delele rect?",
+        text: `Are you sure want to delete selected rect?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // remove from array
+            getEditingTerrain().rects.splice(getSelectedRectIndex(), 1);
+            // reset selected index
+            setSelectedRectIndex(-1);
+        }
+    });
 }
 
 // ----------------------- scroll list terrains -----------------------
