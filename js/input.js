@@ -26,7 +26,7 @@ function mouseDragged() {
             let rect = getSelectedRect();
             if (rect && mouseButton == LEFT) {
                 dragRect(rect);
-            } else {
+            } else if (mouseButton == RIGHT) {
                 dragTerrainCamera();
             }
         }
@@ -35,7 +35,7 @@ function mouseDragged() {
             let terrain = getSelectedTerrain();
             if (terrain && mouseButton == LEFT) {
                 dragTerrain(terrain);
-            } else {
+            } else if (mouseButton == RIGHT) {
                 dragMapCamera();
             }
         }

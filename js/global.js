@@ -11,7 +11,7 @@ let globalData = {
         },
         listTerrains: TERRAIN_MAP.SUMMORNER_RIFT,
         editzone: {
-            camera: { x: 0, y: 0, scale: 1 },
+            camera: { x: 0, y: 0, scale: 1, xTo: 0, yTo: 0, scaleTo: 1 },
             selectedTerrainIndex: -1,
             selectedTerrainMouseDelta: { x: 0, y: 0 },
         },
@@ -20,7 +20,7 @@ let globalData = {
         currentTerrainIndex: -1,
         editzone: {
             imageData: null,
-            camera: { x: 0, y: 0, scale: 1 },
+            camera: { x: 0, y: 0, scale: 1, xTo: 0, yTo: 0, scaleTo: 1 },
             selectedRectIndex: -1,
             selectedRectMouseDelta: { x: 0, y: 0 },
         },
@@ -37,6 +37,11 @@ function setTerrainImageData(value) {
 }
 
 // ----------------------- camera -----------------------
+function runCamera() {
+    lerpCamera(getTerrainCamera());
+    lerpCamera(getMapCamera());
+}
+
 function getTerrainCamera() {
     return globalData.terraintab.editzone.camera;
 }
@@ -51,6 +56,15 @@ function resetTerrainCamera() {
 
 function resetMapCamera() {
     resetCamera(getMapCamera());
+}
+
+function centerMapCameraToTerrainIndex(index) {
+    let terrain = getTerrainAtIndex(index);
+    let camera = getMapCamera();
+
+    camera.scaleTo = 1;
+    camera.xTo = -terrain.position.x + width / 2;
+    camera.yTo = -terrain.position.y + height / 2;
 }
 
 // ----------------------- drag event -----------------------
@@ -71,8 +85,8 @@ function dragTerrain(terrain) {
 }
 
 function dragCamera(camera) {
-    camera.x += movedX;
-    camera.y += movedY;
+    camera.xTo += movedX;
+    camera.yTo += movedY;
 }
 
 function dragTerrainCamera() {
@@ -310,7 +324,7 @@ function editSelectedRect() {
                 inputLabel: "Height",
                 inputValue: selectedRect.h,
                 showCancelButton: true,
-                confirmButtonText: `Create`,
+                confirmButtonText: `Save`,
                 denyButtonText: `Cancel`,
             }).then((resultH) => {
                 if (resultH.isConfirmed) {

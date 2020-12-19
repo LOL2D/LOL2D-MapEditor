@@ -1,4 +1,5 @@
 let mode = MODE.MAP;
+let isShowMenu = true;
 let stats;
 
 function setup() {
@@ -21,17 +22,21 @@ function draw() {
 
     background(30);
 
-    // body
     if (mode == MODE.TERRAIN) {
-        drawModeTerrain();
+        drawEditTerrainZone(...UI.terrainEditorZone);
+        isShowMenu && drawMenuTerrain();
         drawHeader("Terrain Editor");
     } else {
-        drawModeMap();
+        drawEditMapZone(...UI.mapEditorZone);
+        isShowMenu && drawMenuMap();
         drawHeader("Map Editor");
     }
 
+    !isShowMenu && drawAuthorInfo();
+
     // input
     runInput();
+    runCamera();
 
     stats.end();
 }
@@ -47,19 +52,31 @@ function drawHeader(t) {
     if (button(...UI.tabMapBtn, mode == MODE.MAP)) {
         mode = MODE.MAP;
     }
+    if (button(isShowMenu ? "↑" : "↓", ...UI.hideMenuBtnZone)) {
+        isShowMenu = !isShowMenu;
+    }
 
     fill("white");
     text(t, width / 2 + UI.menuTerrainZone[2] / 2, 20);
 }
 
+function drawAuthorInfo() {
+    fill("#333");
+    rect(...UI.menuMapZone);
+
+    fill("white");
+    textAlign(LEFT);
+    text(
+        `Author: Hoang Tran\ngithub.com/hoangtran0410\nCopy right @2020`,
+        ...UI.author
+    );
+    textAlign(CENTER);
+}
+
 // =============================================
 // ================= map editor ================
 // =============================================
-function drawModeMap() {
-    // ---------- editor zone ----------
-    drawEditMapZone(...UI.mapEditorZone);
-
-    // ---------- menu zone ----------
+function drawMenuMap() {
     fill("#333");
     rect(...UI.menuMapZone);
 
@@ -138,7 +155,7 @@ function drawEditMapZone(x, y, w, h) {
             }
 
             // select rect -> selecte terrain
-            if (isMousePressed()) {
+            if (isMousePressed() && mouseButton == LEFT) {
                 if (isMouseInRect(rx, ry, rw, rh)) {
                     setSelectedTerrainIndex(i);
                     setSelectedTerrainMouseDelta(
@@ -290,16 +307,18 @@ function renderTerrainItem(index, terrain, x, y, w, h) {
 
     // show buttons on hover list item
     if (isMouseInRect(x, y, w, h)) {
-        if (button("Delete", x + 1, y + h - 20, 55, 20, 0, "#9995", "red")) {
+        let btnW = w / 3;
+
+        if (button("Delete", x, y + h - 20, btnW, 20, 0, "#9995", "red")) {
             deleteTerrainAtIndexConfirm(index);
         }
-        if (button("Edit", x + 56, y + h - 20, 45, 20, false, "#9995")) {
+        if (button("Edit", x + btnW, y + h - 20, btnW, 20, false, "#9995")) {
             mode = MODE.TERRAIN;
             editTerrainAtIndex(index);
         }
 
-        if (button("Add to map →", x + 101, y + h - 20, 88, 20, 0, "#9995")) {
-            console.log("add");
+        if (button("Locate", x + btnW * 2, y + h - 20, btnW, 20, 0, "#9995")) {
+            centerMapCameraToTerrainIndex(index);
         }
     }
 }
@@ -307,11 +326,7 @@ function renderTerrainItem(index, terrain, x, y, w, h) {
 // =============================================
 // =============== terrain editor ==============
 // =============================================
-function drawModeTerrain() {
-    // ---------- editor zone ----------
-    drawEditTerrainZone(...UI.terrainEditorZone);
-
-    // ---------- menu zone ----------
+function drawMenuTerrain() {
     fill("#333");
     noStroke();
     rect(...UI.menuTerrainZone);
@@ -382,9 +397,6 @@ function drawEditTerrainZone(x, y, w, h) {
 
     let camera = getTerrainCamera();
 
-    // grid
-    drawGrid(camera, UI.terrainEditorZone);
-
     // image data
     const imageData = getTerrainImageData();
     if (imageData) {
@@ -396,6 +408,9 @@ function drawEditTerrainZone(x, y, w, h) {
             imageData.height * camera.scale
         );
     }
+
+    // grid
+    drawGrid(camera, UI.terrainEditorZone);
 
     // flags
     let hovered = false;
@@ -430,7 +445,7 @@ function drawEditTerrainZone(x, y, w, h) {
         }
 
         // select rect
-        if (isMousePressed()) {
+        if (isMousePressed() && mouseButton == LEFT) {
             if (isMouseInRect(rx, ry, rw, rh)) {
                 setSelectedRectIndex(i);
                 setSelectedRectMouseDelta(rx - mouseX, ry - mouseY);

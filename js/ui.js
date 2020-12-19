@@ -8,6 +8,10 @@ const UI = {
     gridColorHightlight: "#9998",
     gridSizeRange: [50, 100],
 
+    // tabs
+    hideMenuBtnZone: [210, 10, 30, 30],
+    author: [10, 75],
+
     // map tab
     tabMapBtn: ["Map", 5, 10, 100, 30],
     menuMapZone: [5, 40, 200, 655],
@@ -114,6 +118,9 @@ function drawGrid(camera, bound) {
     // draw info
     let gs = (gridSize / camera.scale).toFixed(2);
     fill("white");
-    text(`Scale: ${camera.scale.toFixed(2)}`, x, y + h - 50, 100, 30);
-    text(`Grid size: ${gs}px`, x, y + h - 30, 150, 30);
+    textAlign(LEFT);
+    text(`Camera: ${~~camera.x} ${~~camera.y}`, x + 5, y + h - 70, 150, 30);
+    text(`Scale: ${camera.scale.toFixed(2)}`, x + 5, y + h - 50, 100, 30);
+    text(`Grid size: ${gs}px`, x + 5, y + h - 30, 150, 30);
+    textAlign(CENTER);
 }
