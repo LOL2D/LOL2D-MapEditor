@@ -106,7 +106,7 @@ function drawModeTerrain() {
 
     if (getEditingTerrain()) {
         if (button(...UI.deleteTerrainBtn)) {
-            deleteEditingTerrain();
+            deleteEditingTerrainConfirm();
         }
 
         if (button(...UI.importTerrainBtn)) {
@@ -337,40 +337,15 @@ function renderTerrainItem(index, terrain, x, y, w, h) {
     // show buttons on hover list item
     if (isMouseInRect(x, y, w, h)) {
         if (button("Delete", x + 1, y + h - 20, 55, 20, 0, "#9995", "red")) {
-            let t = `Are you sure want to delete this terrain index: ${index}, name: ${terrain.name}`;
-            if (window.confirm(t)) {
-                removeTerrainAtIndex(index);
-                setEditingTerrainIndex(-1);
-            }
+            deleteTerrainAtIndexConfirm(index);
         }
         if (button("Edit", x + 56, y + h - 20, 50, 20, false, "#9995")) {
             mode = MODE.TERRAIN;
-            resetCamera(globalData.terraintab.editzone.camera);
-            setEditingTerrainIndex(index);
+            editTerrainAtIndex(index);
         }
 
         if (button("Add to map →", x + 106, y + h - 20, 83, 20, 0, "#9995")) {
             console.log("add");
         }
     }
-}
-
-// interactive rect
-function draggableRect(x, y, w, h, onDrag) {
-    rect(x, y, w, h);
-
-    if (isMouseInRect(x, y, w, h) && isMouseDragged() && mouseButton == LEFT) {
-        onDrag && onDrag(mouseX - pmouseX, mouseY - pmouseY);
-    }
-}
-
-// others
-function preventRightClick(id) {
-    document.getElementById(id).addEventListener(
-        "contextmenu",
-        function (evt) {
-            evt.preventDefault();
-        },
-        false
-    );
 }

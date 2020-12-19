@@ -25,9 +25,7 @@ let globalData = {
     },
 };
 
-// ----------------------- helpers -----------------------
-
-// image data
+// ----------------------- image data -----------------------
 function getTerrainImageData() {
     return globalData.terraintab.editzone.imageData;
 }
@@ -36,7 +34,7 @@ function setTerrainImageData(value) {
     globalData.terraintab.editzone.imageData = value;
 }
 
-// camera
+// ----------------------- camera -----------------------
 function getTerrainCamera() {
     return globalData.terraintab.editzone.camera;
 }
@@ -53,7 +51,7 @@ function resetMapCamera() {
     resetCamera(getMapCamera());
 }
 
-// drag event
+// ----------------------- drag event -----------------------
 function dragRect(rect) {
     const {
         x: delX,
@@ -78,7 +76,7 @@ function dragMapCamera() {
     dragCamera(getMapCamera());
 }
 
-// get/set terrain
+// ----------------------- terrain -----------------------
 function getEditingTerrainIndex() {
     return globalData.terraintab.currentTerrainIndex;
 }
@@ -95,19 +93,24 @@ function getTerrainAtIndex(index) {
     return globalData.maptab.listTerrains[index];
 }
 
-function removeTerrainAtIndex(index) {
-    globalData.maptab.listTerrains.splice(index, 1);
+function editTerrainAtIndex(index) {
+    resetTerrainCamera();
+    setEditingTerrainIndex(index);
 }
 
-function deleteEditingTerrain() {
-    let index = getEditingTerrainIndex();
+function deleteTerrainAtIndexConfirm(index) {
     let terrain = getTerrainAtIndex(index);
     let t = `Are you sure want to delete this terrain index: ${index}, name: ${terrain.name}`;
 
     if (window.confirm(t)) {
-        removeTerrainAtIndex(index);
+        globalData.maptab.listTerrains.splice(index, 1);
         setEditingTerrainIndex(-1);
     }
+}
+
+function deleteEditingTerrainConfirm() {
+    let index = getEditingTerrainIndex();
+    deleteTerrainAtIndexConfirm(index);
 }
 
 function exportEditingTerrainData() {
@@ -116,7 +119,7 @@ function exportEditingTerrainData() {
     window.prompt("Terrain data: (Ctrl+C to copy)", data);
 }
 
-// get/set rect
+// ----------------------- rect -----------------------
 function getSelectedRectIndex() {
     return globalData.terraintab.editzone.selectedRectIndex;
 }
@@ -173,7 +176,7 @@ function deleteSelectedRect() {
     }
 }
 
-// list terrains
+// ----------------------- scroll list terrains -----------------------
 function getListTerrains() {
     return globalData.maptab.listTerrains;
 }

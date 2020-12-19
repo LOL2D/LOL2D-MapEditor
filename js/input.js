@@ -4,7 +4,22 @@ function runInput() {
     pMouseIsPressed = mouseIsPressed;
 }
 
+// helper mouse events
+function isMousePressed() {
+    return !pMouseIsPressed && mouseIsPressed;
+}
+
+function isMouseReleased() {
+    return pMouseIsPressed && !mouseIsPressed;
+}
+
+function isMouseDragged() {
+    return mouseIsPressed && (pmouseX != mouseX || pmouseY != mouseY);
+}
+
 // p5js events
+function mousePressed() {}
+
 function mouseDragged() {
     if (mode == MODE.TERRAIN) {
         if (isMouseInRect(...UI.terrainEditorZone)) {
@@ -21,8 +36,6 @@ function mouseDragged() {
         }
     }
 }
-
-function mousePressed() {}
 
 function mouseWheel(event) {
     // scroll list terrains
@@ -60,17 +73,4 @@ function keyPressed() {
             selectedRect.y++;
         }
     }
-}
-
-// helper mouse events
-function isMousePressed() {
-    return !pMouseIsPressed && mouseIsPressed;
-}
-
-function isMouseReleased() {
-    return pMouseIsPressed && !mouseIsPressed;
-}
-
-function isMouseDragged() {
-    return mouseIsPressed && (pmouseX != mouseX || pmouseY != mouseY);
 }
