@@ -1,8 +1,8 @@
 // camera
 function resetCamera(camera) {
-    camera.scale = 1;
-    camera.x = width / 2;
-    camera.y = height / 2;
+    camera.scaleTo = 1;
+    camera.xTo = width / 2;
+    camera.yTo = height / 2;
 }
 
 function lerpCamera(camera, d = 0.2) {
