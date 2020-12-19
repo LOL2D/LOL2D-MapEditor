@@ -32,7 +32,12 @@ function mouseDragged() {
         }
     } else {
         if (isMouseInRect(...UI.mapEditorZone)) {
-            dragMapCamera();
+            let terrain = getSelectedTerrain();
+            if (terrain && mouseButton == LEFT) {
+                dragTerrain(terrain);
+            } else {
+                dragMapCamera();
+            }
         }
     }
 }

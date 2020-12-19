@@ -69,11 +69,23 @@ function drawModeMap() {
     }
 
     if (button(...UI.importMapBtn)) {
-        console.log("open");
+        console.log("import");
     }
 
     if (button(...UI.exportMapBtn)) {
         exportMap();
+    }
+
+    let selectedTerrainIndex = getSelectedTerrainIndex();
+    if (selectedTerrainIndex >= 0) {
+        if (button(...UI.deleteSelectedTerrainBtn)) {
+            deleteTerrainAtIndexConfirm(selectedTerrainIndex);
+        }
+
+        if (button(...UI.editSelectedTerrainBtn)) {
+            mode = MODE.TERRAIN;
+            setEditingTerrainIndex(selectedTerrainIndex);
+        }
     }
 
     // terrains zone
@@ -83,6 +95,113 @@ function drawModeMap() {
 function drawEditMapZone(x, y, w, h) {
     fill("#222");
     rect(x, y, w, h);
+
+    let mapData = getMapData();
+
+    if (!mapData) {
+        fill("white");
+        text("There is no map data.", x + w / 2, y + h / 2);
+        return;
+    }
+
+    let camera = getMapCamera();
+
+    // grid
+    drawGrid(camera, UI.mapEditorZone);
+
+    // flags
+    let isHoveredTerrain = false;
+    let isSelectTerrain = false;
+
+    // rects
+    fill("#ddd9");
+    strokeWeight(1);
+
+    for (let i = 0; i < mapData.length; i++) {
+        let terrain = mapData[i];
+
+        // flags
+        let isHoveredRect = false;
+
+        // check hover and select
+        for (let j = 0; j < terrain.rects.length; j++) {
+            let r = terrain.rects[j];
+
+            let rx = (terrain.position.x + r.x) * camera.scale + camera.x;
+            let ry = (terrain.position.y + r.y) * camera.scale + camera.y;
+            let rw = r.w * camera.scale;
+            let rh = r.h * camera.scale;
+
+            // hight light on hover
+            if (!isHoveredRect && isMouseInRect(rx, ry, rw, rh)) {
+                isHoveredRect = true;
+            }
+
+            // select rect -> selecte terrain
+            if (isMousePressed()) {
+                if (isMouseInRect(rx, ry, rw, rh)) {
+                    setSelectedTerrainIndex(i);
+                    setSelectedTerrainMouseDelta(
+                        terrain.position.x * camera.scale + camera.x - mouseX,
+                        terrain.position.y * camera.scale + camera.y - mouseY
+                    );
+
+                    isSelectTerrain = true;
+                }
+            }
+        }
+
+        // hover
+        if (!isHoveredTerrain && isHoveredRect) {
+            isHoveredTerrain = true;
+            stroke("red");
+        } else {
+            stroke("white");
+        }
+
+        // hight light selected rect
+        if (getSelectedTerrainIndex() == i) {
+            stroke("yellow");
+            strokeWeight(2);
+        } else {
+            strokeWeight(1);
+        }
+
+        // draw rects
+        for (let j = 0; j < terrain.rects.length; j++) {
+            let r = terrain.rects[j];
+
+            let rx = (terrain.position.x + r.x) * camera.scale + camera.x;
+            let ry = (terrain.position.y + r.y) * camera.scale + camera.y;
+            let rw = r.w * camera.scale;
+            let rh = r.h * camera.scale;
+
+            // draw rect
+            rect(rx, ry, rw, rh);
+        }
+    }
+
+    // remove selected index on click outside rects
+    if (!isSelectTerrain && isMousePressed() && isMouseInRect(x, y, w, h)) {
+        globalData.maptab.editzone.selectedTerrainIndex = -1;
+    }
+
+    // center point
+    fill("red");
+    noStroke();
+    circle(camera.x, camera.y, 5);
+
+    // terrain name
+    let selectedIndex = getSelectedTerrainIndex();
+    if (selectedIndex >= 0) {
+        fill("white");
+        noStroke();
+        text(
+            `Terrain: ${selectedIndex} - ${getSelectedTerrain().name}`,
+            x + w / 2,
+            y + 10
+        );
+    }
 }
 
 function listScrollTerrains(title, x, y, w, h) {
@@ -129,30 +248,22 @@ function listScrollTerrains(title, x, y, w, h) {
 
 function renderTerrainItem(index, terrain, x, y, w, h) {
     // background
-    stroke("white");
     noFill();
+    stroke("gray");
+    strokeWeight(1);
     rect(x, y, w, h);
 
     // scale up/down to fit item container
-    let top = Infinity,
-        left = Infinity,
-        right = -Infinity,
-        bottom = -Infinity;
-
-    for (let p of terrain.rects) {
-        top = min(p.y, top);
-        bottom = max(p.y + p.h, bottom);
-        left = min(p.x, left);
-        right = max(p.x + p.w, right);
-    }
-
-    let W = abs(right) - abs(left) > 0 ? abs(right) * 2 : abs(left) * 2;
-    let H = abs(bottom) - abs(top) > 0 ? abs(bottom) * 2 : abs(top) * 2;
-
-    let scaleRatio = min(w, h) / max(W, H);
+    const { scaleRatio, W, H } = calculateFitBound(
+        w,
+        h,
+        getBound(terrain.rects),
+        true
+    );
 
     // draw shape
     fill("#ddd9");
+    stroke("white");
     for (let r of terrain.rects) {
         rect(
             r.x * scaleRatio + x + w / 2,
@@ -311,7 +422,7 @@ function drawEditTerrainZone(x, y, w, h) {
         }
 
         // hight light selected rect
-        if (globalData.terraintab.editzone.selectedRectIndex == i) {
+        if (getSelectedRectIndex() == i) {
             stroke("yellow");
             strokeWeight(2);
         } else {
@@ -321,11 +432,8 @@ function drawEditTerrainZone(x, y, w, h) {
         // select rect
         if (isMousePressed()) {
             if (isMouseInRect(rx, ry, rw, rh)) {
-                globalData.terraintab.editzone.selectedRectIndex = i;
-                globalData.terraintab.editzone.selectedRectMouseDelta = {
-                    x: rx - mouseX,
-                    y: ry - mouseY,
-                };
+                setSelectedRectIndex(i);
+                setSelectedRectMouseDelta(rx - mouseX, ry - mouseY);
 
                 isSelectRect = true;
             }
@@ -337,7 +445,7 @@ function drawEditTerrainZone(x, y, w, h) {
 
     // remove selected index on click outside rects
     if (!isSelectRect && isMousePressed() && isMouseInRect(x, y, w, h)) {
-        globalData.terraintab.editzone.selectedRectIndex = -1;
+        setSelectedRectIndex(-1);
     }
 
     // center point

@@ -12,6 +12,8 @@ let globalData = {
         listTerrains: TERRAIN_MAP.SUMMORNER_RIFT,
         editzone: {
             camera: { x: 0, y: 0, scale: 1 },
+            selectedTerrainIndex: -1,
+            selectedTerrainMouseDelta: { x: 0, y: 0 },
         },
     },
     terraintab: {
@@ -53,14 +55,19 @@ function resetMapCamera() {
 
 // ----------------------- drag event -----------------------
 function dragRect(rect) {
-    const {
-        x: delX,
-        y: delY,
-    } = globalData.terraintab.editzone.selectedRectMouseDelta;
+    const { x: delX, y: delY } = getSelectedRectMouseDelta();
 
     const camera = getTerrainCamera();
     rect.x = ~~((mouseX + delX - camera.x) / camera.scale);
     rect.y = ~~((mouseY + delY - camera.y) / camera.scale);
+}
+
+function dragTerrain(terrain) {
+    const { x: delX, y: delY } = getSelectedTerrainMouseDelta();
+
+    const camera = getMapCamera();
+    terrain.position.x = ~~((mouseX + delX - camera.x) / camera.scale);
+    terrain.position.y = ~~((mouseY + delY - camera.y) / camera.scale);
 }
 
 function dragCamera(camera) {
@@ -77,6 +84,30 @@ function dragMapCamera() {
 }
 
 // ----------------------- map -----------------------
+function getSelectedTerrain() {
+    return globalData.maptab.listTerrains[getSelectedTerrainIndex()];
+}
+
+function getSelectedTerrainIndex() {
+    return globalData.maptab.editzone.selectedTerrainIndex;
+}
+
+function setSelectedTerrainIndex(index) {
+    globalData.maptab.editzone.selectedTerrainIndex = index;
+}
+
+function getSelectedTerrainMouseDelta() {
+    return globalData.maptab.editzone.selectedTerrainMouseDelta;
+}
+
+function setSelectedTerrainMouseDelta(x, y) {
+    globalData.maptab.editzone.selectedTerrainMouseDelta = { x, y };
+}
+
+function getMapData() {
+    return globalData.maptab.listTerrains;
+}
+
 function exportMap(format) {
     let map = getListTerrains();
     let data = format ? JSON.stringify(map, null, 4) : JSON.stringify(map);
@@ -214,6 +245,14 @@ function getSelectedRect() {
 
 function getRectAtIndex(index) {
     return getEditingTerrain()?.rects[index];
+}
+
+function getSelectedRectMouseDelta() {
+    return globalData.terraintab.editzone.selectedRectMouseDelta;
+}
+
+function setSelectedRectMouseDelta(x, y) {
+    globalData.terraintab.editzone.selectedRectMouseDelta = { x, y };
 }
 
 function newRect() {

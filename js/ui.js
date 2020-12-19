@@ -3,6 +3,11 @@ const UI = {
     cnvWidth: 1000,
     cnvHeight: 700,
 
+    // grid
+    gridColor: "#5558",
+    gridColorHightlight: "#9998",
+    gridSizeRange: [50, 100],
+
     // map tab
     tabMapBtn: ["Map", 5, 10, 100, 30],
     menuMapZone: [5, 40, 200, 655],
@@ -10,6 +15,8 @@ const UI = {
     newMapBtn: ["New map +", 10, 60, 190, 25, 0, 0, "green"],
     importMapBtn: ["Import..", 10, 90, 92.5, 25, 0, 0, "black"],
     exportMapBtn: ["Export..", 107.5, 90, 92.5, 25, 0, 0, "black"],
+    deleteSelectedTerrainBtn: ["Delete", 10, 120, 92.5, 25, 0, 0, "red"],
+    editSelectedTerrainBtn: ["Edit", 107.5, 120, 92.5, 25],
     listTerrainsSroll: ["List terrains:", 10, 200, 190, 490],
 
     // terrain tab
@@ -63,41 +70,48 @@ function drawGrid(camera, bound) {
     let w = bound[2];
     let h = bound[3];
 
-    stroke("#555");
-    strokeWeight(1);
-    let zoneLeft = x;
-    let zoneRight = zoneLeft + w;
-    let zoneTop = y;
-    let zoneBottom = zoneTop + h;
-    let gridSizeRange = [50, 100];
+    let left = x;
+    let right = left + w;
+    let top = y;
+    let bottom = top + h;
     let gridSize = 50 * camera.scale;
 
-    if (gridSize < gridSizeRange[0]) {
-        while (gridSize < gridSizeRange[0]) {
+    if (gridSize < UI.gridSizeRange[0]) {
+        while (gridSize < UI.gridSizeRange[0]) {
             gridSize *= 2;
         }
-    } else if (gridSize > gridSizeRange[1]) {
-        while (gridSize > gridSizeRange[1]) {
+    } else if (gridSize > UI.gridSizeRange[1]) {
+        while (gridSize > UI.gridSizeRange[1]) {
             gridSize = ~~(gridSize / 2);
         }
     }
 
-    for (let i = camera.x; i > zoneLeft; i -= gridSize) {
-        line(i, zoneTop, i, zoneBottom);
+    // draw grid
+    strokeWeight(1);
+    stroke(UI.gridColor);
+
+    for (let i = camera.x; i > left; i -= gridSize) {
+        line(i, top, i, bottom);
     }
 
-    for (let i = camera.x; i < zoneRight; i += gridSize) {
-        line(i, zoneTop, i, zoneBottom);
+    for (let i = camera.x; i < right; i += gridSize) {
+        line(i, top, i, bottom);
     }
 
-    for (let i = camera.y; i > zoneTop; i -= gridSize) {
-        line(zoneLeft, i, zoneRight, i);
+    for (let i = camera.y; i > top; i -= gridSize) {
+        line(left, i, right, i);
     }
 
-    for (let i = camera.y; i < zoneBottom; i += gridSize) {
-        line(zoneLeft, i, zoneRight, i);
+    for (let i = camera.y; i < bottom; i += gridSize) {
+        line(left, i, right, i);
     }
 
+    // hightlight center line
+    stroke(UI.gridColorHightlight);
+    line(camera.x, top, camera.x, bottom);
+    line(left, camera.y, right, camera.y);
+
+    // draw info
     let gs = (gridSize / camera.scale).toFixed(2);
     fill("white");
     text(`Scale: ${camera.scale.toFixed(2)}`, x, y + h - 50, 100, 30);
