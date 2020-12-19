@@ -60,22 +60,46 @@ function mouseWheel(event) {
 }
 
 function keyPressed() {
-    let selectedRect = getSelectedRect();
-    if (selectedRect) {
-        if (keyCode == LEFT_ARROW) {
-            selectedRect.x--;
-        }
+    if (mode == MODE.MAP) {
+        let selectedTerrain = getSelectedTerrain();
 
-        if (keyCode == RIGHT_ARROW) {
-            selectedRect.x++;
-        }
+        if (selectedTerrain) {
+            if (keyCode == LEFT_ARROW) {
+                selectedTerrain.position.x--;
+            }
 
-        if (keyCode == UP_ARROW) {
-            selectedRect.y--;
-        }
+            if (keyCode == RIGHT_ARROW) {
+                selectedTerrain.position.x++;
+            }
 
-        if (keyCode == DOWN_ARROW) {
-            selectedRect.y++;
+            if (keyCode == UP_ARROW) {
+                selectedTerrain.position.y--;
+            }
+
+            if (keyCode == DOWN_ARROW) {
+                selectedTerrain.position.y++;
+            }
+        }
+    }
+
+    if (mode == MODE.TERRAIN) {
+        let selectedRect = getSelectedRect();
+        if (selectedRect) {
+            if (keyCode == LEFT_ARROW) {
+                selectedRect.x--;
+            }
+
+            if (keyCode == RIGHT_ARROW) {
+                selectedRect.x++;
+            }
+
+            if (keyCode == UP_ARROW) {
+                selectedRect.y--;
+            }
+
+            if (keyCode == DOWN_ARROW) {
+                selectedRect.y++;
+            }
         }
     }
 }
