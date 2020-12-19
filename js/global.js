@@ -98,6 +98,22 @@ function dragMapCamera() {
 }
 
 // ----------------------- map -----------------------
+function newMap() {
+    Swal.fire({
+        title: "Create new map?",
+        html:
+            "<u>Mọi terrains</u> sẽ bị <u>XÓA</u>. Hãy <u>Export</u> và lưu dữ liệu trước khi tạo map mới.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Create now",
+        confirmButtonColor: "red",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            globalData.maptab.listTerrains = [];
+        }
+    });
+}
+
 function getSelectedTerrain() {
     return globalData.maptab.listTerrains[getSelectedTerrainIndex()];
 }
@@ -121,6 +137,8 @@ function setSelectedTerrainMouseDelta(x, y) {
 function getMapData() {
     return globalData.maptab.listTerrains;
 }
+
+function setMapData() {}
 
 function exportMap(format) {
     let map = getListTerrains();

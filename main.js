@@ -82,7 +82,7 @@ function drawMenuMap() {
 
     // buttons
     if (button(...UI.newMapBtn)) {
-        console.log("new");
+        newMap();
     }
 
     if (button(...UI.importMapBtn)) {
