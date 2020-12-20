@@ -323,6 +323,12 @@ function exportMap(format) {
 function editTerrainAtIndex(index) {
     resetTerrainCamera();
     setEditingTerrainIndex(index);
+
+    // load image of terrain
+    let terrain = getTerrainAtIndex(index);
+    loadImage("terrain-images/" + terrain.name + ".png", (data) => {
+        setTerrainImageData(data);
+    });
 }
 
 // ----------------------- terrain -----------------------

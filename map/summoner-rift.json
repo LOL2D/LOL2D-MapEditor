@@ -1,6 +1,6 @@
 [
     {
-        "name": "blue_toplane-terrain-1",
+        "name": "blue-team/top1",
         "position": { "x": 1110, "y": 6751 },
         "rects": [
             { "x": -96, "y": -203, "w": 270, "h": 550 },
