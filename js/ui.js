@@ -28,17 +28,18 @@ const UI = {
     menuTerrainZone: [5, 40, 200, 655],
     terrainEditorZone: [205, 40, 790, 655],
     newTerrainBtn: ["New terrain +", 10, 60, 190, 25, 0, 0, "green"],
-    deleteTerrainBtn: ["Delete", 10, 90, 92.5, 25, 0, 0, "red"],
-    renameTerrainBtn: ["Rename", 107.5, 90, 92.5, 25],
-    importTerrainBtn: ["Import..", 10, 120, 92.5, 25, 0, 0, "black"],
-    exportTerrainBtn: ["Export..", 107.5, 120, 92.5, 25, 0, 0, "black"],
+    cloneTerrainBtn: ["Clone terrain", 10, 90, 190, 25, 0, 0, "green"],
+    deleteTerrainBtn: ["Delete", 10, 120, 92.5, 25, 0, 0, "red"],
+    renameTerrainBtn: ["Rename", 107.5, 120, 92.5, 25],
+    removeImageTerrainBtn: ["Remove image", 10, 150, 92.5, 25, 0, 0, "red"],
+    loadImageTerrainBtn: ["Load image..", 107.5, 150, 92.5, 25, 0, 0, "black"],
+    importTerrainBtn: ["Import..", 10, 180, 92.5, 25, 0, 0, "black"],
+    exportTerrainBtn: ["Export..", 107.5, 180, 92.5, 25, 0, 0, "black"],
 
-    removeImageTerrainBtn: ["Remove image", 10, 170, 92.5, 25, 0, 0, "red"],
-    loadImageTerrainBtn: ["Load image..", 107.5, 170, 92.5, 25, 0, 0, "black"],
-    resetCameraTerrainBtn: ["Reset camera", 10, 200, 92.5, 25, 0, 0, "blue"],
-    newRectBtn: ["New rect +", 107.5, 200, 92.5, 25, 0, 0, "green"],
-    deleteSelectedRectBtn: ["Delete rect", 10, 230, 92.5, 25, 0, 0, "red"],
-    editSelectedRectBtn: ["Edit rect", 107.5, 230, 92.5, 25],
+    resetCameraTerrainBtn: ["Reset camera", 10, 220, 190, 25, 0, 0, "blue"],
+    newRectBtn: ["New rect +", 10, 270, 190, 25, 0, 0, "green"],
+    deleteSelectedRectBtn: ["Delete rect", 10, 300, 92.5, 25, 0, 0, "red"],
+    editSelectedRectBtn: ["Edit rect", 107.5, 300, 92.5, 25],
 };
 
 // button
@@ -95,26 +96,26 @@ function drawGrid(camera, bound) {
     strokeWeight(1);
     stroke(UI.gridColor);
 
-    for (let i = camera.x; i > left; i -= gridSize) {
+    for (let i = -camera.x; i > left; i -= gridSize) {
         line(i, top, i, bottom);
     }
 
-    for (let i = camera.x; i < right; i += gridSize) {
+    for (let i = -camera.x; i < right; i += gridSize) {
         line(i, top, i, bottom);
     }
 
-    for (let i = camera.y; i > top; i -= gridSize) {
+    for (let i = -camera.y; i > top; i -= gridSize) {
         line(left, i, right, i);
     }
 
-    for (let i = camera.y; i < bottom; i += gridSize) {
+    for (let i = -camera.y; i < bottom; i += gridSize) {
         line(left, i, right, i);
     }
 
     // hightlight center line
     stroke(UI.gridColorHightlight);
-    line(camera.x, top, camera.x, bottom);
-    line(left, camera.y, right, camera.y);
+    line(-camera.x, top, -camera.x, bottom);
+    line(left, -camera.y, right, -camera.y);
 
     // draw info
     let gs = (gridSize / camera.scale).toFixed(2);

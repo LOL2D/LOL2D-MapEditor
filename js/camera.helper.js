@@ -1,9 +1,15 @@
 // camera
 function resetCamera(camera) {
     camera.scaleTo = 1;
-    camera.xTo = width / 2;
-    camera.yTo = height / 2;
+    camera.xTo = 0;
+    camera.yTo = 0;
 }
+
+// function convertPos(_x, _y) {
+//     return {
+//         x: _x
+//     }
+// }
 
 function lerpCamera(camera, d = 0.2) {
     camera.scale = lerp(camera.scale, camera.scaleTo, d);
@@ -20,8 +26,11 @@ function zoomTo(camera, _ratio) {
     camera.scaleTo = ratio;
 
     // Zoom from the triggering point of the event
-    camera.xTo = mouseX + (camera.x - mouseX) * tiLe;
-    camera.yTo = mouseY + (camera.y - mouseY) * tiLe;
+    // camera.xTo = mouseX + (camera.x - mouseX) * tiLe;
+    // camera.yTo = mouseY + (camera.y - mouseY) * tiLe;
+
+    camera.xTo = (mouseX - camera.x) * tiLe;
+    camera.yTo = (mouseY - camera.y) * tiLe;
 }
 
 function zoomBy(camera, value) {

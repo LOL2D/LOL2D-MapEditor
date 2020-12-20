@@ -25,7 +25,7 @@ function draw() {
     if (mode == MODE.TERRAIN) {
         drawEditTerrainZone(...UI.terrainEditorZone);
         isShowMenu && drawMenuTerrain();
-        drawHeader("Terrain Editor");
+        drawHeader("Terrain Editor - " + getEditingTerrain().name);
     } else {
         drawEditMapZone(...UI.mapEditorZone);
         isShowMenu && drawMenuMap();
@@ -123,6 +123,11 @@ function drawEditMapZone(x, y, w, h) {
 
     let camera = getMapCamera();
 
+    push();
+    translate(width / 2, height / 2);
+    scale(camera.scale);
+    translate(-camera.x, -camera.y);
+
     // grid
     drawGrid(camera, UI.mapEditorZone);
 
@@ -144,10 +149,10 @@ function drawEditMapZone(x, y, w, h) {
         for (let j = 0; j < terrain.rects.length; j++) {
             let r = terrain.rects[j];
 
-            let rx = (terrain.position.x + r.x) * camera.scale + camera.x;
-            let ry = (terrain.position.y + r.y) * camera.scale + camera.y;
-            let rw = r.w * camera.scale;
-            let rh = r.h * camera.scale;
+            let rx = terrain.position.x + r.x;
+            let ry = terrain.position.y + r.y;
+            let rw = r.w;
+            let rh = r.h;
 
             // hight light on hover
             if (!isHoveredRect && isMouseInRect(rx, ry, rw, rh)) {
@@ -188,10 +193,10 @@ function drawEditMapZone(x, y, w, h) {
         for (let j = 0; j < terrain.rects.length; j++) {
             let r = terrain.rects[j];
 
-            let rx = (terrain.position.x + r.x) * camera.scale + camera.x;
-            let ry = (terrain.position.y + r.y) * camera.scale + camera.y;
-            let rw = r.w * camera.scale;
-            let rh = r.h * camera.scale;
+            let rx = terrain.position.x + r.x;
+            let ry = terrain.position.y + r.y;
+            let rw = r.w;
+            let rh = r.h;
 
             // draw rect
             rect(rx, ry, rw, rh);
@@ -200,13 +205,15 @@ function drawEditMapZone(x, y, w, h) {
 
     // remove selected index on click outside rects
     if (!isSelectTerrain && isMousePressed() && isMouseInRect(x, y, w, h)) {
-        globalData.maptab.editzone.selectedTerrainIndex = -1;
+        setSelectedTerrainIndex(-1);
     }
 
     // center point
     fill("red");
     noStroke();
-    circle(camera.x, camera.y, 5);
+    circle(0, 0, 5);
+
+    pop();
 
     // terrain name
     let selectedIndex = getSelectedTerrainIndex();
@@ -314,28 +321,30 @@ function renderTerrainItem(index, terrain, x, y, w, h) {
     noStroke();
     circle(x + w / 2, y + h / 2, 5);
 
-    // title + size
+    // title
     fill("white");
     noStroke();
 
     let title = index + " - " + terrain.name;
     text(title, x + textWidth(title) / 2 + 5, y + 10);
 
-    let size = W + " x " + H;
-    text(size, x + textWidth(size) / 2 + 5, y + 30);
-
-    // show buttons on hover list item
+    // on hover list item
     if (isMouseInRect(x, y, w, h)) {
+        // show size
+        let size = W + " x " + H;
+        text(size, x + textWidth(size) / 2 + 5, y + 30);
+
+        // show buttons
         let btnW = w / 3;
 
-        if (button("Clone", x, y + h - 40, btnW, 20, false, "#9995")) {
+        if (button("Clone", x, y + h - 40, btnW, 20, 0, "#9995", "green")) {
             cloneTerrainAtIndex(index);
         }
 
         if (button("Delete", x, y + h - 20, btnW, 20, 0, "#9995", "red")) {
             deleteTerrainAtIndexConfirm(index);
         }
-        if (button("Edit", x + btnW, y + h - 20, btnW, 20, false, "#9995")) {
+        if (button("Edit", x + btnW, y + h - 20, btnW, 20, 0, "#9995")) {
             mode = MODE.TERRAIN;
             editTerrainAtIndex(index);
         }
@@ -360,6 +369,10 @@ function drawMenuTerrain() {
     }
 
     if (getEditingTerrain()) {
+        if (button(...UI.cloneTerrainBtn)) {
+            cloneEditingTerrain();
+        }
+
         if (button(...UI.deleteTerrainBtn)) {
             deleteEditingTerrainConfirm();
         }
@@ -386,7 +399,10 @@ function drawMenuTerrain() {
             });
         }
 
-        if (button(...UI.resetCameraTerrainBtn)) {
+        let cam = getTerrainCamera();
+        let isCameraChanged =
+            ~~cam.xTo != 0 || ~~cam.yTo != 0 || cam.scaleTo != 1;
+        if (isCameraChanged && button(...UI.resetCameraTerrainBtn)) {
             resetTerrainCamera();
         }
 
@@ -424,13 +440,18 @@ function drawEditTerrainZone(x, y, w, h) {
 
     let camera = getTerrainCamera();
 
+    push();
+    translate(width / 2, height / 2);
+    scale(camera.scale);
+    translate(-camera.x, -camera.y);
+
     // image data
     const imageData = getTerrainImageData();
     if (imageData) {
         image(
             imageData,
-            camera.x,
-            camera.y,
+            x + w / 2,
+            y + h / 2,
             imageData.width * camera.scale,
             imageData.height * camera.scale
         );
@@ -450,10 +471,10 @@ function drawEditTerrainZone(x, y, w, h) {
     for (let i = 0; i < terrain.rects.length; i++) {
         let r = terrain.rects[i];
 
-        let rx = r.x * camera.scale + camera.x;
-        let ry = r.y * camera.scale + camera.y;
-        let rw = r.w * camera.scale;
-        let rh = r.h * camera.scale;
+        let rx = r.x;
+        let ry = r.y;
+        let rw = r.w;
+        let rh = r.h;
 
         // hight light on hover
         if (!hovered && isMouseInRect(rx, ry, rw, rh)) {
@@ -493,7 +514,7 @@ function drawEditTerrainZone(x, y, w, h) {
     // center point
     fill("red");
     noStroke();
-    circle(camera.x, camera.y, 5);
+    circle(0, 0, 5);
 
     // terrain name
     fill("white");
@@ -503,4 +524,6 @@ function drawEditTerrainZone(x, y, w, h) {
         x + w / 2,
         y + 10
     );
+
+    pop();
 }
