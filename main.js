@@ -65,12 +65,12 @@ function drawAuthorInfo() {
     rect(...UI.menuMapZone);
 
     fill("white");
-    textAlign(LEFT);
+    textAlign(LEFT, TOP);
     text(
-        `Author: Hoang Tran\ngithub.com/hoangtran0410\nCopy right @2020`,
+        `Author: Hoang Tran\ngithub.com/hoangtran0410\nCopy right @2020\n\nLEFT MOUSE: choose/drag terrain\nRIGHT MOUSE: drag camera`,
         ...UI.author
     );
-    textAlign(CENTER);
+    textAlign(CENTER, CENTER);
 }
 
 // =============================================
