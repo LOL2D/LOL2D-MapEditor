@@ -14,7 +14,7 @@ let globalData = {
             camera: { x: 0, y: 0, scale: 1, xTo: 0, yTo: 0, scaleTo: 1 },
             selectedTerrainIndex: -1,
             selectedTerrainMouseDelta: { x: 0, y: 0 },
-            mapsize: [1000, 1000],
+            mapsize: [9600, 9600],
         },
     },
     terraintab: {
@@ -102,44 +102,51 @@ function dragMapCamera() {
 
 // ----------------------- map -----------------------
 function newMap() {
-    Swal.fire({
-        title: "Create new map?",
-        html: `All terrains will be <b>REMOVED</b>.<br/> 
-            Please <b>EXPORT</b> and SAVE Map Data<br/>
-            <b>BEFORE</b> create new one.`,
-        icon: "warning",
+    setPaused(true);
+    Swal.mixin({
+        title: "Create new map",
         showCancelButton: true,
-        confirmButtonText: "I understood!",
-        confirmButtonColor: "red",
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.mixin({
-                title: "Create new map",
+        progressSteps: ["1", "2", "3"],
+    })
+        .queue([
+            {
+                html: `All terrains will be <b>REMOVED</b>.<br/> 
+                    Please <b>EXPORT</b> and SAVE Map Data<br/>
+                    <b>BEFORE</b> create new one.`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "I understood!",
+                confirmButtonColor: "red",
+            },
+            {
+                text: "Map width?",
+                confirmButtonText: "Next &rarr;",
                 input: "number",
                 inputValue: 1000,
-                showCancelButton: true,
-                progressSteps: ["1", "2"],
-            })
-                .queue([
-                    { text: "Map width?", confirmButtonText: "Next &rarr;" },
-                    { text: "Map height?", confirmButtonText: "Create now" },
-                ])
-                .then((resultSize) => {
-                    if (resultSize.value) {
-                        setMapSize(
-                            Number(resultSize.value[0]),
-                            Number(resultSize.value[1])
-                        );
-                        setMapData([]);
-                    }
-                });
-        }
-    });
+            },
+            {
+                text: "Map height?",
+                confirmButtonText: "Create now",
+                input: "number",
+                inputValue: 1000,
+            },
+        ])
+        .then((resultSize) => {
+            setPaused(false);
+            if (resultSize.value) {
+                setMapSize(
+                    Number(resultSize.value[0]),
+                    Number(resultSize.value[1])
+                );
+                setMapData([]);
+            }
+        });
 }
 
 function changeMapSize() {
     let currentSize = getMapSize();
 
+    setPaused(true);
     Swal.mixin({
         title: "Change map size",
         input: "number",
@@ -160,6 +167,7 @@ function changeMapSize() {
             },
         ])
         .then((resultSize) => {
+            setPaused(false);
             if (resultSize.value) {
                 setMapSize(
                     Number(resultSize.value[0]),
@@ -273,8 +281,6 @@ function importMap(json = "") {
         inputLabel: "JSON data (array of terrain)",
         confirmButtonText: "Import",
         showCancelButton: true,
-        // showDenyButton: true,
-        // denyButtonText: "Import file?",
         footer: `<button onClick="importMapFile()">
                     Import file?
                 </button>`,
@@ -337,14 +343,17 @@ function getTerrainAtIndex(index) {
 }
 
 function newTerrain(successCallback) {
+    setPaused(true);
     Swal.fire({
         title: "Create new terrain",
         text: "Name of terrain:",
         input: "text",
+        inputValue: "new terrain",
         showCancelButton: true,
         confirmButtonText: `Create`,
         denyButtonText: `Cancel`,
     }).then((result) => {
+        setPaused(false);
         if (result.isConfirmed) {
             // add to begin of array
             globalData.maptab.listTerrains.unshift({
@@ -363,6 +372,7 @@ function newTerrain(successCallback) {
 function cloneTerrainAtIndex(index) {
     let terrain = { ...getTerrainAtIndex(index) };
 
+    setPaused(true);
     Swal.fire({
         title: `Clone terrain "${terrain.name}"`,
         text: "Name of new terrain:",
@@ -372,6 +382,7 @@ function cloneTerrainAtIndex(index) {
         confirmButtonText: `Clone`,
         denyButtonText: `Cancel`,
     }).then((result) => {
+        setPaused(false);
         if (result.isConfirmed) {
             terrain.name = result.value;
             terrain.position.x = 0;
@@ -391,6 +402,7 @@ function cloneEditingTerrain() {
 function renameTerrainAtIndex(index) {
     let terrain = getTerrainAtIndex(index);
 
+    setPaused(true);
     Swal.fire({
         title: "Rename terrain",
         input: "text",
@@ -399,6 +411,7 @@ function renameTerrainAtIndex(index) {
         showCancelButton: true,
         confirmButtonText: "Rename it",
     }).then((result) => {
+        setPaused(false);
         if (result.isConfirmed) {
             terrain.name = result.value;
         }
@@ -417,6 +430,7 @@ function deleteTerrainAtIndex(index) {
 function deleteTerrainAtIndexConfirm(index) {
     let terrain = getTerrainAtIndex(index);
 
+    setPaused(true);
     Swal.fire({
         title: `Delele terrain "${terrain.name}"?`,
         text: `Are you sure want to delete this terrain? \n index: ${index}, name: ${terrain.name}`,
@@ -426,6 +440,7 @@ function deleteTerrainAtIndexConfirm(index) {
         cancelButtonColor: "#3085d6",
         confirmButtonText: "Yes, delete it!",
     }).then((result) => {
+        setPaused(false);
         if (result.isConfirmed) {
             deleteTerrainAtIndex(index);
         }
@@ -553,6 +568,7 @@ function addRectToEditingTerrain(x, y, w, h) {
 }
 
 function newRect() {
+    setPaused(true);
     Swal.mixin({
         title: "Create new rect",
         input: "number",
@@ -565,6 +581,7 @@ function newRect() {
             { text: "Rect Height?", confirmButtonText: "Create" },
         ])
         .then((resultSize) => {
+            setPaused(false);
             if (resultSize.value) {
                 let w = Number(resultSize.value[0]) || 50;
                 let h = Number(resultSize.value[1]) || 50;
@@ -577,38 +594,39 @@ function newRect() {
 function editSelectedRect() {
     let selectedRect = getSelectedRect();
 
-    Swal.fire({
+    setPaused(true);
+    Swal.mixin({
         title: "Edit selected rect",
         input: "number",
-        inputLabel: "Width",
-        inputValue: selectedRect.w,
         showCancelButton: true,
-        confirmButtonText: `Next`,
         denyButtonText: `Cancel`,
-    }).then((resultW) => {
-        if (resultW.isConfirmed) {
-            Swal.fire({
-                title: "Edit selected rect",
-                input: "number",
+    })
+        .queue([
+            {
+                inputLabel: "Width",
+                inputValue: selectedRect.w,
+                confirmButtonText: `Next`,
+            },
+            {
                 inputLabel: "Height",
                 inputValue: selectedRect.h,
-                showCancelButton: true,
                 confirmButtonText: `Save`,
-                denyButtonText: `Cancel`,
-            }).then((resultH) => {
-                if (resultH.isConfirmed) {
-                    let w = Number(resultW.value) || 50;
-                    let h = Number(resultH.value) || 50;
+            },
+        ])
+        .then((result) => {
+            setPaused(false);
+            if (result.value) {
+                let w = Number(result.value[0]) || 50;
+                let h = Number(result.value[0]) || 50;
 
-                    selectedRect.w = w;
-                    selectedRect.h = h;
-                }
-            });
-        }
-    });
+                selectedRect.w = w;
+                selectedRect.h = h;
+            }
+        });
 }
 
 function deleteSelectedRect() {
+    setPaused(true);
     Swal.fire({
         title: "Delele rect?",
         text: `Are you sure want to delete selected rect?`,
@@ -618,7 +636,9 @@ function deleteSelectedRect() {
         cancelButtonColor: "#3085d6",
         confirmButtonText: "Yes, delete it!",
     }).then((result) => {
+        setPaused(false);
         if (result.isConfirmed) {
+            console.log(getSelectedRect());
             // remove from array
             getEditingTerrain().rects.splice(getSelectedRectIndex(), 1);
             // reset selected index

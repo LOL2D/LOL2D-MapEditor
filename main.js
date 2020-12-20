@@ -28,6 +28,8 @@ function draw() {
 
     background(30);
 
+    if (pausedInput) return;
+
     if (mode == MODE.TERRAIN) {
         drawEditTerrainZone(...UI.terrainEditorZone);
         isShowMenu && drawMenuTerrain();
