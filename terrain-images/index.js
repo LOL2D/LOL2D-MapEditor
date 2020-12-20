@@ -7,6 +7,17 @@ function filesnameToArray(filenames, prefix) {
     return a;
 }
 
+function imagePathsToMapJson(imgPaths) {
+    let b = [];
+    for (let p of imgPaths)
+        b.push({
+            name: p,
+            position: { x: 0, y: 0 },
+            rects: [],
+        });
+    return b;
+}
+
 // result
 let imagePaths = [
     // blue team

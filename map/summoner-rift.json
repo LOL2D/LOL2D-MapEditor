@@ -12,5 +12,197 @@
             { "x": -46, "y": -353, "w": 50, "h": 50 },
             { "x": 4, "y": -328, "w": 25, "h": 25 }
         ]
-    }
+    },
+    {
+        "name": "blue-team/bird.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/blue.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/bot1.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/bot2.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/bot3.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/bot4.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/dragon.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/front-red.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/mid1.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/mid2.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/mid3.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/mid4.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/wall1.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/wall2.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/nexus.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/red.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/rock.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/spawn.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/top1.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "blue-team/top2.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/baron.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/bird.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/blue.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/bot1.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/bot2.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/bot3.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/red2.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/mid1.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/mid2.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/mid3.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/mid4.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/wall1.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/wall2.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/nexus.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    { "name": "red-team/red.png", "position": { "x": 0, "y": 0 }, "rects": [] },
+    {
+        "name": "red-team/rock.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/spawn.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/top1.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    {
+        "name": "red-team/top2.png",
+        "position": { "x": 0, "y": 0 },
+        "rects": []
+    },
+    { "name": "red-team/top3.png", "position": { "x": 0, "y": 0 }, "rects": [] }
 ]
