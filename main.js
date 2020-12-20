@@ -25,7 +25,7 @@ function draw() {
     if (mode == MODE.TERRAIN) {
         drawEditTerrainZone(...UI.terrainEditorZone);
         isShowMenu && drawMenuTerrain();
-        drawHeader("Terrain Editor");
+        drawHeader("Terrain Editor - " + getEditingTerrain()?.name);
     } else {
         drawEditMapZone(...UI.mapEditorZone);
         isShowMenu && drawMenuMap();
@@ -200,7 +200,7 @@ function drawEditMapZone(x, y, w, h) {
 
     // remove selected index on click outside rects
     if (!isSelectTerrain && isMousePressed() && isMouseInRect(x, y, w, h)) {
-        globalData.maptab.editzone.selectedTerrainIndex = -1;
+        setSelectedTerrainIndex(-1);
     }
 
     // center point
@@ -314,28 +314,30 @@ function renderTerrainItem(index, terrain, x, y, w, h) {
     noStroke();
     circle(x + w / 2, y + h / 2, 5);
 
-    // title + size
+    // title
     fill("white");
     noStroke();
 
     let title = index + " - " + terrain.name;
     text(title, x + textWidth(title) / 2 + 5, y + 10);
 
-    let size = W + " x " + H;
-    text(size, x + textWidth(size) / 2 + 5, y + 30);
-
-    // show buttons on hover list item
+    // on hover list item
     if (isMouseInRect(x, y, w, h)) {
+        // show size
+        let size = W + " x " + H;
+        text(size, x + textWidth(size) / 2 + 5, y + 30);
+
+        // show buttons
         let btnW = w / 3;
 
-        if (button("Clone", x, y + h - 40, btnW, 20, false, "#9995")) {
+        if (button("Clone", x, y + h - 40, btnW, 20, 0, "#9995", "green")) {
             cloneTerrainAtIndex(index);
         }
 
         if (button("Delete", x, y + h - 20, btnW, 20, 0, "#9995", "red")) {
             deleteTerrainAtIndexConfirm(index);
         }
-        if (button("Edit", x + btnW, y + h - 20, btnW, 20, false, "#9995")) {
+        if (button("Edit", x + btnW, y + h - 20, btnW, 20, 0, "#9995")) {
             mode = MODE.TERRAIN;
             editTerrainAtIndex(index);
         }
@@ -360,6 +362,10 @@ function drawMenuTerrain() {
     }
 
     if (getEditingTerrain()) {
+        if (button(...UI.cloneTerrainBtn)) {
+            cloneEditingTerrain();
+        }
+
         if (button(...UI.deleteTerrainBtn)) {
             deleteEditingTerrainConfirm();
         }

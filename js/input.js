@@ -1,7 +1,12 @@
 let pMouseIsPressed;
+let pausedInput = false;
 
 function runInput() {
     pMouseIsPressed = mouseIsPressed;
+}
+
+function setPaused(value) {
+    pausedInput = value;
 }
 
 // helper mouse events
@@ -21,6 +26,8 @@ function isMouseDragged() {
 function mousePressed() {}
 
 function mouseDragged() {
+    if (pausedInput) return;
+
     if (mode == MODE.TERRAIN) {
         if (isMouseInRect(...UI.terrainEditorZone)) {
             let rect = getSelectedRect();
@@ -43,6 +50,8 @@ function mouseDragged() {
 }
 
 function mouseWheel(event) {
+    if (pausedInput) return;
+
     // scroll list terrains
     if (mode == MODE.MAP && isMouseInRect(...UI.listTerrainsSroll.slice(1))) {
         scollListTerrainItems(event.delta);
@@ -60,6 +69,8 @@ function mouseWheel(event) {
 }
 
 function keyPressed() {
+    if (pausedInput) return;
+
     if (mode == MODE.MAP) {
         let selectedTerrain = getSelectedTerrain();
 

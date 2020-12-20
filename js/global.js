@@ -146,6 +146,8 @@ function exportMap(format) {
     let map = getListTerrains();
     let data = format ? JSON.stringify(map, null, 4) : JSON.stringify(map);
 
+    setPaused(true);
+
     Swal.fire({
         title: "Map data" + (format ? " formatted" : ""),
         icon: "success",
@@ -161,6 +163,7 @@ function exportMap(format) {
         showCancelButton: true,
         cancelButtonText: "Close",
     }).then((result) => {
+        setPaused(false);
         if (result.isConfirmed) {
             exportMap(true);
         }
@@ -206,8 +209,8 @@ function newTerrain(successCallback) {
                 rects: [],
             });
 
+            resetCamera(getTerrainCamera());
             setEditingTerrainIndex(0);
-
             successCallback && successCallback();
         }
     });
@@ -217,7 +220,7 @@ function cloneTerrainAtIndex(index) {
     let terrain = { ...getTerrainAtIndex(index) };
 
     Swal.fire({
-        title: "Clone terrain",
+        title: `Clone terrain "${terrain.name}"`,
         text: "Name of new terrain:",
         input: "text",
         inputValue: terrain.name,
@@ -230,15 +233,16 @@ function cloneTerrainAtIndex(index) {
             terrain.position.x = 0;
             terrain.position.y = 0;
 
-            globalData.maptab.listTerrains.splice(index, 0, terrain);
-            setEditingTerrainIndex(index);
-
-            locateTerrainIndex(index);
+            globalData.maptab.listTerrains.splice(index + 1, 0, terrain);
+            setEditingTerrainIndex(index + 1);
+            locateTerrainIndex(index + 1);
         }
     });
 }
 
-function cloneEditingTerrain() {}
+function cloneEditingTerrain() {
+    cloneTerrainAtIndex(getEditingTerrainIndex());
+}
 
 function renameTerrainAtIndex(index) {
     let terrain = getTerrainAtIndex(index);
@@ -265,7 +269,7 @@ function deleteTerrainAtIndexConfirm(index) {
     let terrain = getTerrainAtIndex(index);
 
     Swal.fire({
-        title: "Delele terrain?",
+        title: `Delele terrain "${terrain.name}"?`,
         text: `Are you sure want to delete this terrain? \n index: ${index}, name: ${terrain.name}`,
         icon: "warning",
         showCancelButton: true,
@@ -291,6 +295,8 @@ function exportEditingTerrainData(format) {
         ? JSON.stringify(terrain, null, 4)
         : JSON.stringify(terrain);
 
+    setPaused(true);
+
     Swal.fire({
         title: "Terrain data" + (format ? " formatted" : ""),
         icon: "success",
@@ -306,6 +312,7 @@ function exportEditingTerrainData(format) {
         showCancelButton: true,
         cancelButtonText: "Close",
     }).then((result) => {
+        setPaused(false);
         if (result.isConfirmed) {
             exportEditingTerrainData(true);
         }
