@@ -21,7 +21,8 @@ const UI = {
     exportMapBtn: ["Export..", 107.5, 90, 92.5, 25, 0, 0, "black"],
     deleteSelectedTerrainBtn: ["Delete", 10, 120, 92.5, 25, 0, 0, "red"],
     editSelectedTerrainBtn: ["Edit", 107.5, 120, 92.5, 25],
-    listTerrainsSroll: ["List terrains:", 10, 200, 190, 490],
+    resetCameraMapBtn: ["Reset camera", 10, 150, 190, 25, 0, 0, "blue"],
+    listTerrainsSroll: ["List terrains:", 10, 230, 190, 460],
 
     // terrain tab
     tabTerrainBtn: ["Terrain", 105, 10, 100, 30],

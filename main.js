@@ -105,6 +105,10 @@ function drawMenuMap() {
         }
     }
 
+    if (button(...UI.resetCameraMapBtn)) {
+        resetMapCamera();
+    }
+
     // terrains zone
     listScrollTerrains(...UI.listTerrainsSroll);
 }
