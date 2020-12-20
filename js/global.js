@@ -451,7 +451,7 @@ function newTerrain(successCallback) {
 }
 
 function cloneTerrainAtIndex(index) {
-    let terrain = { ...getTerrainAtIndex(index) };
+    let terrain = getTerrainAtIndex(index);
 
     setPaused(true);
     Swal.fire({
@@ -465,11 +465,12 @@ function cloneTerrainAtIndex(index) {
     }).then((result) => {
         setPaused(false);
         if (result.isConfirmed) {
-            terrain.name = result.value;
-            terrain.position.x = 0;
-            terrain.position.y = 0;
+            let newT = JSON.parse(JSON.stringify(terrain));
 
-            globalData.maptab.listTerrains.splice(index + 1, 0, terrain);
+            newT.name = result.value;
+            newT.position = { x: 0, y: 0 };
+
+            globalData.maptab.listTerrains.splice(index + 1, 0, newT);
             setEditingTerrainIndex(index + 1);
             locateTerrainIndex(index + 1);
         }
