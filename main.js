@@ -394,7 +394,7 @@ function drawMenuTerrain() {
         }
 
         if (button(...UI.importTerrainBtn)) {
-            console.log("import");
+            importTerrain();
         }
 
         if (button(...UI.exportTerrainBtn)) {

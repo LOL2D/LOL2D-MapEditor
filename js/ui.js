@@ -35,13 +35,13 @@ const UI = {
     renameTerrainBtn: ["Rename", 107.5, 120, 92.5, 25],
     removeImageTerrainBtn: ["Remove image", 10, 150, 92.5, 25, 0, 0, "red"],
     loadImageTerrainBtn: ["Load image..", 107.5, 150, 92.5, 25, 0, 0, "black"],
-    importTerrainBtn: ["Import..", 10, 180, 92.5, 25, 0, 0, "black"],
-    exportTerrainBtn: ["Export..", 107.5, 180, 92.5, 25, 0, 0, "black"],
+    exportTerrainBtn: ["Export..", 10, 180, 190, 25, 0, 0, "black"],
 
     resetCameraTerrainBtn: ["Reset camera", 10, 230, 190, 25, 0, 0, "blue"],
     newRectBtn: ["New rect +", 10, 280, 190, 25, 0, 0, "green"],
-    deleteSelectedRectBtn: ["Delete rect", 10, 310, 92.5, 25, 0, 0, "red"],
-    editSelectedRectBtn: ["Edit rect", 107.5, 310, 92.5, 25],
+    importTerrainBtn: ["Import..", 10, 310, 190, 25, 0, 0, "black"],
+    deleteSelectedRectBtn: ["Delete rect", 10, 340, 92.5, 25, 0, 0, "red"],
+    editSelectedRectBtn: ["Edit rect", 107.5, 340, 92.5, 25],
 };
 
 // button

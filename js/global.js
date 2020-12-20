@@ -437,6 +437,62 @@ function deleteEditingTerrainConfirm() {
     deleteTerrainAtIndexConfirm(index);
 }
 
+function processJsonTerrainData(datastr) {
+    try {
+        let rects = JSON.parse(datastr);
+
+        Swal.fire({
+            title: `Import ${rects.length} rects to this terrain?`,
+            text: "Choose import mode. Override or Add to exist rects?",
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: `Add`,
+            denyButtonText: `Override`,
+        }).then((resultMode) => {
+            if (resultMode.isDenied) {
+                Swal.fire({
+                    title: "Override terrain data?",
+                    html: `All current rects will be <b>REMOVED</b>.`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Override!",
+                    confirmButtonColor: "red",
+                }).then((resultConfirmOverride) => {
+                    if (resultConfirmOverride.isConfirmed) {
+                        getEditingTerrain().rects = rects;
+                    }
+                });
+            } else if (resultMode.isConfirmed) {
+                let editingTerrain = getEditingTerrain();
+                editingTerrain.rects = [...editingTerrain.rects, ...rects];
+            }
+        });
+    } catch (e) {
+        Swal.fire({
+            title: "Error",
+            html: "Failed to import json data<br/>" + e,
+            icon: "error",
+        });
+    }
+}
+
+function importTerrain() {
+    setPaused(true);
+    Swal.fire({
+        title: "Import rects",
+        input: "textarea",
+        inputValue: "",
+        inputLabel: "JSON data (array of rects)",
+        confirmButtonText: "Import",
+        showCancelButton: true,
+    }).then((result) => {
+        setPaused(false);
+        if (result.isConfirmed) {
+            processJsonTerrainData(result.value);
+        }
+    });
+}
+
 function exportEditingTerrainData(format) {
     let terrain = getEditingTerrain();
     let data = format

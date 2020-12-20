@@ -8,10 +8,6 @@ function createImageFromFile(file) {
     }
 }
 
-function createJsonFromFile(file) {
-    
-}
-
 function getLocalFile(calback) {
     createFileInput((files) => {
         calback(files);
