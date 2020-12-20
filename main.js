@@ -81,6 +81,10 @@ function drawMenuMap() {
     rect(...UI.menuMapZone);
 
     // buttons
+    if (button(...UI.changeMapSizeBtn)) {
+        changeMapSize();
+    }
+
     if (button(...UI.newMapBtn)) {
         newMap();
     }
@@ -128,7 +132,7 @@ function drawEditMapZone(x, y, w, h) {
     let camera = getMapCamera();
 
     // grid
-    drawGrid(camera, UI.mapEditorZone);
+    drawGrid(camera, UI.mapEditorZone, getMapSize());
 
     // flags
     let isHoveredTerrain = false;

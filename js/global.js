@@ -14,6 +14,7 @@ let globalData = {
             camera: { x: 0, y: 0, scale: 1, xTo: 0, yTo: 0, scaleTo: 1 },
             selectedTerrainIndex: -1,
             selectedTerrainMouseDelta: { x: 0, y: 0 },
+            mapsize: [1000, 1000],
         },
     },
     terraintab: {
@@ -103,17 +104,77 @@ function dragMapCamera() {
 function newMap() {
     Swal.fire({
         title: "Create new map?",
-        html:
-            "<u>Mọi terrains</u> sẽ bị <u>XÓA</u>. Hãy <u>Export</u> và lưu dữ liệu trước khi tạo map mới.",
+        html: `All terrains will be <b>REMOVED</b>.<br/> 
+            Please <b>EXPORT</b> and SAVE Map Data<br/>
+            <b>BEFORE</b> create new one.`,
         icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Create now",
+        confirmButtonText: "I understood!",
         confirmButtonColor: "red",
     }).then((result) => {
         if (result.isConfirmed) {
-            globalData.maptab.listTerrains = [];
+            Swal.mixin({
+                title: "Create new map",
+                input: "number",
+                inputValue: 1000,
+                showCancelButton: true,
+                progressSteps: ["1", "2"],
+            })
+                .queue([
+                    { text: "Map width?", confirmButtonText: "Next &rarr;" },
+                    { text: "Map height?", confirmButtonText: "Create now" },
+                ])
+                .then((resultSize) => {
+                    if (resultSize.value) {
+                        setMapSize(
+                            Number(resultSize.value[0]),
+                            Number(resultSize.value[1])
+                        );
+                        setMapData([]);
+                    }
+                });
         }
     });
+}
+
+function changeMapSize() {
+    let currentSize = getMapSize();
+
+    Swal.mixin({
+        title: "Change map size",
+        input: "number",
+        inputValue: 1000,
+        showCancelButton: true,
+        progressSteps: ["1", "2"],
+    })
+        .queue([
+            {
+                text: "Map width?",
+                inputValue: currentSize[0],
+                confirmButtonText: "Next &rarr;",
+            },
+            {
+                text: "Map height?",
+                inputValue: currentSize[1],
+                confirmButtonText: "Save",
+            },
+        ])
+        .then((resultSize) => {
+            if (resultSize.value) {
+                setMapSize(
+                    Number(resultSize.value[0]),
+                    Number(resultSize.value[1])
+                );
+            }
+        });
+}
+
+function getMapSize() {
+    return globalData.maptab.editzone.mapsize;
+}
+
+function setMapSize(w, h) {
+    globalData.maptab.editzone.mapsize = [w, h];
 }
 
 function getSelectedTerrain() {
@@ -140,7 +201,9 @@ function getMapData() {
     return globalData.maptab.listTerrains;
 }
 
-function setMapData() {}
+function setMapData(value) {
+    globalData.maptab.listTerrains = value;
+}
 
 function exportMap(format) {
     let map = getListTerrains();
@@ -265,6 +328,11 @@ function renameEditingTerrain() {
     renameTerrainAtIndex(getEditingTerrainIndex());
 }
 
+function deleteTerrainAtIndex(index) {
+    globalData.maptab.listTerrains.splice(index, 1);
+    setEditingTerrainIndex(-1);
+}
+
 function deleteTerrainAtIndexConfirm(index) {
     let terrain = getTerrainAtIndex(index);
 
@@ -278,8 +346,7 @@ function deleteTerrainAtIndexConfirm(index) {
         confirmButtonText: "Yes, delete it!",
     }).then((result) => {
         if (result.isConfirmed) {
-            globalData.maptab.listTerrains.splice(index, 1);
-            setEditingTerrainIndex(-1);
+            deleteTerrainAtIndex(index);
         }
     });
 }
@@ -344,40 +411,30 @@ function setSelectedRectMouseDelta(x, y) {
     globalData.terraintab.editzone.selectedRectMouseDelta = { x, y };
 }
 
+function addRectToEditingTerrain(x, y, w, h) {
+    getEditingTerrain().rects.push({ x, y, w, h });
+}
+
 function newRect() {
-    Swal.fire({
+    Swal.mixin({
         title: "Create new rect",
         input: "number",
-        inputLabel: "Width",
         inputValue: 50,
         showCancelButton: true,
-        confirmButtonText: `Next`,
-        denyButtonText: `Cancel`,
-    }).then((resultW) => {
-        if (resultW.isConfirmed) {
-            Swal.fire({
-                title: "Create new rect",
-                input: "number",
-                inputLabel: "Height",
-                inputValue: 50,
-                showCancelButton: true,
-                confirmButtonText: `Create`,
-                denyButtonText: `Cancel`,
-            }).then((resultH) => {
-                if (resultH.isConfirmed) {
-                    let w = Number(resultW.value) || 50;
-                    let h = Number(resultH.value) || 50;
+        progressSteps: ["1", "2"],
+    })
+        .queue([
+            { text: "Rect Width?", confirmButtonText: "Next &rarr;" },
+            { text: "Rect Height?", confirmButtonText: "Create" },
+        ])
+        .then((resultSize) => {
+            if (resultSize.value) {
+                let w = Number(resultSize.value[0]) || 50;
+                let h = Number(resultSize.value[1]) || 50;
 
-                    getEditingTerrain().rects.push({
-                        x: -w / 2,
-                        y: -h / 2,
-                        w,
-                        h,
-                    });
-                }
-            });
-        }
-    });
+                addRectToEditingTerrain(-w / 2, -h / 2, w, h);
+            }
+        });
 }
 
 function editSelectedRect() {

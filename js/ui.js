@@ -16,7 +16,8 @@ const UI = {
     tabMapBtn: ["Map", 5, 10, 100, 30],
     menuMapZone: [5, 40, 200, 655],
     mapEditorZone: [205, 40, 790, 655],
-    newMapBtn: ["New map +", 10, 60, 190, 25, 0, 0, "green"],
+    changeMapSizeBtn: ["Change size", 10, 60, 92.5, 25],
+    newMapBtn: ["New map +", 107.5, 60, 92.5, 25, 0, 0, "green"],
     importMapBtn: ["Import..", 10, 90, 92.5, 25, 0, 0, "black"],
     exportMapBtn: ["Export..", 107.5, 90, 92.5, 25, 0, 0, "black"],
     deleteSelectedTerrainBtn: ["Delete", 10, 120, 92.5, 25, 0, 0, "red"],
@@ -71,11 +72,11 @@ function isMouseInRect(x, y, w, h) {
     return mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h;
 }
 
-function drawGrid(camera, bound) {
-    let x = bound[0];
-    let y = bound[1];
-    let w = bound[2];
-    let h = bound[3];
+function drawGrid(camera, edgeBound, mapSize) {
+    let x = edgeBound[0];
+    let y = edgeBound[1];
+    let w = edgeBound[2];
+    let h = edgeBound[3];
 
     let left = x;
     let right = left + w;
@@ -111,6 +112,16 @@ function drawGrid(camera, bound) {
 
     for (let i = camera.y; i < bottom; i += gridSize) {
         line(left, i, right, i);
+    }
+
+    // draw map size
+    if (mapSize) {
+        let mw = mapSize[0] * camera.scale;
+        let mh = mapSize[1] * camera.scale;
+
+        noFill();
+        stroke("red");
+        rect(camera.x, camera.y, mw, mh);
     }
 
     // hightlight center line
