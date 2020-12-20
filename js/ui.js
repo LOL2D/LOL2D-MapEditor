@@ -120,7 +120,13 @@ function drawGrid(camera, bound) {
     let gs = (gridSize / camera.scale).toFixed(2);
     fill("white");
     textAlign(LEFT);
-    text(`Camera: ${~~camera.x} ${~~camera.y}`, x + 5, y + h - 70, 150, 30);
+    text(
+        `Camera: ${width / 2 - ~~camera.x} ${height / 2 - ~~camera.y}`,
+        x + 5,
+        y + h - 70,
+        150,
+        30
+    );
     text(`Scale: ${camera.scale.toFixed(2)}`, x + 5, y + h - 50, 100, 30);
     text(`Grid size: ${gs}px`, x + 5, y + h - 30, 150, 30);
     textAlign(CENTER);
