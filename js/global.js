@@ -43,7 +43,7 @@ function chooseMode() {
 
         if (result.isConfirmed) {
             // using normal mode
-            loadJSON("map/summoner-rift.json", (data) => {
+            loadJSON("map/sample.json", (data) => {
                 setMapData(data);
             });
             isFirebaseMode = false;
