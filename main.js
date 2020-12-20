@@ -2,18 +2,23 @@ let mode = MODE.MAP;
 let isShowMenu = true;
 let stats;
 
-function preload() {
-    loadJSON("map/summoner-rift.json", (data) => {
-        setMapData(data);
-    });
-}
-
 function setup() {
     createCanvas(UI.cnvWidth, UI.cnvHeight).id("game-canvas");
     textAlign(CENTER, CENTER);
     textFont("Consolas", 13);
     imageMode(CENTER);
     preventRightClick("game-canvas");
+
+    // using fire base
+    initFireBase();
+    getDataFromFireBase((data) => {
+        setMapData(data);
+    });
+
+    // using local json
+    // loadJSON("map/summoner-rift.json", (data) => {
+    //     setMapData(data);
+    // });
 
     stats = new Stats();
     stats.showPanel(0);

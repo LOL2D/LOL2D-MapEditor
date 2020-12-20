@@ -11,11 +11,12 @@ function imagePathsToMapJson(imgPaths) {
     let b = [];
     for (let p of imgPaths)
         b.push({
-            name: p,
-            position: { x: 0, y: 0 },
-            rects: [],
+            name: p.replace(".png", ""),
+            position: { x: ~~random(9000), y: ~~random(9000) },
+            rects: [{ x: 0, y: 0, w: 50, h: 50 }],
         });
-    return b;
+
+    return JSON.stringify(b);
 }
 
 // result
