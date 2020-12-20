@@ -90,7 +90,7 @@ function drawGrid(camera, edgeBound, mapSize) {
         }
     } else if (gridSize > UI.gridSizeRange[1]) {
         while (gridSize > UI.gridSizeRange[1]) {
-            gridSize = ~~(gridSize / 2);
+            gridSize = gridSize / 2;
         }
     }
 
