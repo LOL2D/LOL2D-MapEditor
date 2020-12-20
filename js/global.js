@@ -506,6 +506,7 @@ function renameEditingTerrain() {
 function deleteTerrainAtIndex(index) {
     globalData.maptab.listTerrains.splice(index, 1);
     setEditingTerrainIndex(-1);
+    if (getSelectedTerrainIndex() == index) setSelectedTerrainIndex(-1);
 }
 
 function deleteTerrainAtIndexConfirm(index) {
