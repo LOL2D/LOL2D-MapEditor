@@ -9,7 +9,7 @@ let globalData = {
             itemIndex: 0,
             itemPerPage: 3,
         },
-        listTerrains: TERRAIN_MAP.SUMMORNER_RIFT,
+        listTerrains: [],
         editzone: {
             camera: { x: 0, y: 0, scale: 1, xTo: 0, yTo: 0, scaleTo: 1 },
             selectedTerrainIndex: -1,
@@ -203,6 +203,87 @@ function getMapData() {
 
 function setMapData(value) {
     globalData.maptab.listTerrains = value;
+}
+
+function processJsonMapData(datastr) {
+    try {
+        let data = JSON.parse(datastr);
+
+        Swal.fire({
+            title: `Import ${data.length} terrains?`,
+            text: "Choose import mode. Override or Add to exist map?",
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: `Add`,
+            denyButtonText: `Override`,
+        }).then((resultMode) => {
+            if (resultMode.isDenied) {
+                Swal.fire({
+                    title: "Override map data?",
+                    html: `All current terrains will be <b>REMOVED</b>.<br/> 
+                        Please <b>EXPORT</b> and SAVE Map Data<br/>
+                        <b>BEFORE</b> override.`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "I understood!",
+                    confirmButtonColor: "red",
+                }).then((resultConfirmOverride) => {
+                    if (resultConfirmOverride.isConfirmed) {
+                        setMapData(data);
+                    }
+                });
+            } else if (resultMode.isConfirmed) {
+                setMapData([...getMapData(), ...data]);
+            }
+        });
+    } catch (e) {
+        Swal.fire({
+            title: "Error",
+            html: "Failed to import json data<br/>" + e,
+            icon: "error",
+        });
+    }
+}
+
+async function importMapFile() {
+    const { value: file } = await Swal.fire({
+        title: "Select json file",
+        input: "file",
+        inputAttributes: {
+            accept: ".json",
+            "aria-label": "Upload your json file",
+        },
+    });
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            importMap(e.target.result);
+        };
+        reader.readAsText(file);
+    }
+}
+
+function importMap(json = "") {
+    setPaused(true);
+    Swal.fire({
+        title: "Import JSON map data",
+        input: "textarea",
+        inputValue: json,
+        inputLabel: "JSON data (array of terrain)",
+        confirmButtonText: "Import",
+        showCancelButton: true,
+        // showDenyButton: true,
+        // denyButtonText: "Import file?",
+        footer: `<button onClick="importMapFile()">
+                    Import file?
+                </button>`,
+    }).then((result) => {
+        setPaused(false);
+        if (result.isConfirmed) {
+            processJsonMapData(result.value);
+        }
+    });
 }
 
 function exportMap(format) {

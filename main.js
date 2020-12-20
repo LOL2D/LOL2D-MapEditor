@@ -2,6 +2,12 @@ let mode = MODE.MAP;
 let isShowMenu = true;
 let stats;
 
+function preload() {
+    loadJSON("map/summoner-rift.json", (data) => {
+        setMapData(data);
+    });
+}
+
 function setup() {
     createCanvas(UI.cnvWidth, UI.cnvHeight).id("game-canvas");
     textAlign(CENTER, CENTER);
@@ -90,7 +96,7 @@ function drawMenuMap() {
     }
 
     if (button(...UI.importMapBtn)) {
-        console.log("import");
+        importMap();
     }
 
     if (button(...UI.exportMapBtn)) {
