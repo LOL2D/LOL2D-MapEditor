@@ -203,7 +203,12 @@ function drawEditMapZone(x, y, w, h) {
     }
 
     // remove selected index on click outside rects
-    if (!isSelectTerrain && isMousePressed() && isMouseInRect(x, y, w, h)) {
+    if (
+        !isSelectTerrain &&
+        mouseButton == LEFT &&
+        isMousePressed() &&
+        isMouseInRect(x, y, w, h)
+    ) {
         setSelectedTerrainIndex(-1);
     }
 
@@ -496,7 +501,12 @@ function drawEditTerrainZone(x, y, w, h) {
     }
 
     // remove selected index on click outside rects
-    if (!isSelectRect && isMousePressed() && isMouseInRect(x, y, w, h)) {
+    if (
+        !isSelectRect &&
+        mouseButton == LEFT &&
+        isMousePressed() &&
+        isMouseInRect(x, y, w, h)
+    ) {
         setSelectedRectIndex(-1);
     }
 
