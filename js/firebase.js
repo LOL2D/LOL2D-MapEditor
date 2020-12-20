@@ -16,12 +16,38 @@ function initFireBase() {
     firebase.analytics();
 }
 
-function getDataFromFireBase(callback) {
-    var database = firebase.database();
+function listenToFireBase(callback) {
+    firebase
+        .database()
+        .ref("data/")
+        .on("value", (snapshot) => {
+            const data = snapshot.val();
 
-    database.ref("data/").on("value", (snapshot) => {
-        const data = snapshot.val();
+            callback && callback(data);
+        });
+}
 
-        callback && callback(data);
+function updateFirebaseTerrain(index, data) {
+    firebase
+        .database()
+        .ref("data/" + index)
+        .set(data);
+
+    // notify
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+        },
+    });
+
+    Toast.fire({
+        icon: "success",
+        title: "Terrain data has been pushed to firebase.",
     });
 }

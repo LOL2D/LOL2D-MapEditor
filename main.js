@@ -9,23 +9,15 @@ function setup() {
     imageMode(CENTER);
     preventRightClick("game-canvas");
 
-    // using fire base
-    initFireBase();
-    getDataFromFireBase((data) => {
-        setMapData(data);
-    });
-
-    // using local json
-    // loadJSON("map/summoner-rift.json", (data) => {
-    //     setMapData(data);
-    // });
-
     stats = new Stats();
     stats.showPanel(0);
     document.body.appendChild(stats.dom);
 
     resetTerrainCamera();
     resetMapCamera();
+
+    // choose mode before use tool
+    chooseMode();
 }
 
 function draw() {
@@ -64,6 +56,9 @@ function drawHeader(t) {
     }
     if (button(...UI.tabMapBtn, mode == MODE.MAP)) {
         mode = MODE.MAP;
+
+        // update firebase data
+        pushEdittedTerrainDataToFirebase();
     }
     if (button(isShowMenu ? "↑" : "↓", ...UI.hideMenuBtnZone)) {
         isShowMenu = !isShowMenu;
@@ -94,16 +89,16 @@ function drawMenuMap() {
     rect(...UI.menuMapZone);
 
     // buttons
-    if (button(...UI.changeMapSizeBtn)) {
-        changeMapSize();
-    }
-
-    if (button(...UI.newMapBtn)) {
-        newMap();
-    }
-
-    if (button(...UI.importMapBtn)) {
-        importMap();
+    if (!isFirebaseMode) {
+        if (button(...UI.changeMapSizeBtn)) {
+            changeMapSize();
+        }
+        if (button(...UI.newMapBtn)) {
+            newMap();
+        }
+        if (button(...UI.importMapBtn)) {
+            importMap();
+        }
     }
 
     if (button(...UI.exportMapBtn)) {
@@ -112,8 +107,10 @@ function drawMenuMap() {
 
     let selectedTerrainIndex = getSelectedTerrainIndex();
     if (selectedTerrainIndex >= 0) {
-        if (button(...UI.deleteSelectedTerrainBtn)) {
-            deleteTerrainAtIndexConfirm(selectedTerrainIndex);
+        if (!isFirebaseMode) {
+            if (button(...UI.deleteSelectedTerrainBtn)) {
+                deleteTerrainAtIndexConfirm(selectedTerrainIndex);
+            }
         }
 
         if (button(...UI.editSelectedTerrainBtn)) {
@@ -123,7 +120,8 @@ function drawMenuMap() {
     }
 
     if (button(...UI.resetCameraMapBtn)) {
-        resetMapCamera();
+        // resetMapCamera();
+        viewAllMap();
     }
 
     // terrains zone
@@ -383,39 +381,43 @@ function drawMenuTerrain() {
     rect(...UI.menuTerrainZone);
 
     // buttons
-    if (button(...UI.newTerrainBtn)) {
-        newTerrain();
+    if (!isFirebaseMode) {
+        if (button(...UI.newTerrainBtn)) {
+            newTerrain();
+        }
     }
 
     if (getEditingTerrain()) {
-        if (button(...UI.cloneTerrainBtn)) {
-            cloneEditingTerrain();
-        }
+        if (!isFirebaseMode) {
+            if (button(...UI.cloneTerrainBtn)) {
+                cloneEditingTerrain();
+            }
 
-        if (button(...UI.deleteTerrainBtn)) {
-            deleteEditingTerrainConfirm();
-        }
+            if (button(...UI.deleteTerrainBtn)) {
+                deleteEditingTerrainConfirm();
+            }
 
-        if (button(...UI.renameTerrainBtn)) {
-            renameEditingTerrain();
-        }
+            if (button(...UI.renameTerrainBtn)) {
+                renameEditingTerrain();
+            }
 
-        if (button(...UI.importTerrainBtn)) {
-            importTerrain();
-        }
+            if (button(...UI.importTerrainBtn)) {
+                importTerrain();
+            }
 
-        if (button(...UI.exportTerrainBtn)) {
-            exportEditingTerrainData();
-        }
+            if (button(...UI.exportTerrainBtn)) {
+                exportEditingTerrainData();
+            }
 
-        if (button(...UI.removeImageTerrainBtn)) {
-            setTerrainImageData(null);
-        }
+            if (button(...UI.removeImageTerrainBtn)) {
+                setTerrainImageData(null);
+            }
 
-        if (button(...UI.loadImageTerrainBtn)) {
-            getLocalFile((file) => {
-                setTerrainImageData(createImageFromFile(file));
-            });
+            if (button(...UI.loadImageTerrainBtn)) {
+                getLocalFile((file) => {
+                    setTerrainImageData(createImageFromFile(file));
+                });
+            }
         }
 
         if (button(...UI.resetCameraTerrainBtn)) {

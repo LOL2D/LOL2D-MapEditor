@@ -3,6 +3,8 @@ const MODE = {
     MAP: "Map",
 };
 
+let isFirebaseMode = false;
+
 let globalData = {
     maptab: {
         scrollList: {
@@ -28,6 +30,41 @@ let globalData = {
     },
 };
 
+// ----------------------- firebase --------------------------
+function chooseMode() {
+    setPaused(true);
+    Swal.fire({
+        title: "Choose mode",
+        showCancelButton: true,
+        cancelButtonText: "Firebase",
+        confirmButtonText: "Normal",
+    }).then((result) => {
+        setPaused(false);
+
+        if (result.isConfirmed) {
+            // using normal mode
+            loadJSON("map/summoner-rift.json", (data) => {
+                setMapData(data);
+            });
+            isFirebaseMode = false;
+        } else {
+            // using fire base
+            initFireBase();
+            listenToFireBase((data) => {
+                setMapData(data);
+            });
+            isFirebaseMode = true;
+        }
+    });
+}
+
+function pushEdittedTerrainDataToFirebase() {
+    let index = getEditingTerrainIndex();
+    if (index >= 0) {
+        updateFirebaseTerrain(index, getEditingTerrain());
+    }
+}
+
 // ----------------------- image data -----------------------
 function getTerrainImageData() {
     return globalData.terraintab.editzone.imageData;
@@ -41,6 +78,15 @@ function setTerrainImageData(value) {
 function runCamera() {
     lerpCamera(getTerrainCamera());
     lerpCamera(getMapCamera());
+}
+
+function viewAllMap() {
+    let camera = getMapCamera();
+    let mapSize = getMapSize();
+
+    camera.scaleTo = min(width, height) / max(mapSize[0], mapSize[1]);
+    camera.xTo = 250;
+    camera.yTo = 0;
 }
 
 function getTerrainCamera() {
@@ -623,7 +669,7 @@ function editSelectedRect() {
             setPaused(false);
             if (result.value) {
                 let w = Number(result.value[0]) || 50;
-                let h = Number(result.value[0]) || 50;
+                let h = Number(result.value[1]) || 50;
 
                 selectedRect.w = w;
                 selectedRect.h = h;
