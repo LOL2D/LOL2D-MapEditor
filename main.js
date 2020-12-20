@@ -56,12 +56,15 @@ function drawHeader(t) {
     }
     if (button(...UI.tabMapBtn, mode == MODE.MAP)) {
         mode = MODE.MAP;
-
-        // update firebase data
-        pushEdittedTerrainDataToFirebase();
     }
     if (button(isShowMenu ? "↑" : "↓", ...UI.hideMenuBtnZone)) {
         isShowMenu = !isShowMenu;
+    }
+
+    if (isFirebaseMode) {
+        if (button(...UI.saveToFireBaseBtn)) {
+            pushEdittedTerrainDataToFirebase();
+        }
     }
 
     fill("white");
@@ -260,11 +263,14 @@ function listScrollTerrains(title, x, y, w, h) {
     text(t, x + textWidth(t) / 2, y - 15);
 
     // buttons
-    if (button("New +", x + w - 50, y - 30, 50, 25, 0, 0, "green")) {
-        newTerrain(() => {
-            mode = MODE.TERRAIN;
-        });
+    if (!isFirebaseMode) {
+        if (button("New +", x + w - 50, y - 30, 50, 25, 0, 0, "green")) {
+            newTerrain(() => {
+                mode = MODE.TERRAIN;
+            });
+        }
     }
+
     if (button("Scroll Up ↑", x, y, w, 20, itemIndex == 0)) {
         scollListTerrainItems(-1);
     }
@@ -354,13 +360,16 @@ function renderTerrainItem(index, terrain, x, y, w, h) {
         // show buttons
         let btnW = w / 3;
 
-        if (button("Clone", x, y + h - 40, btnW, 20, 0, "#9995", "green")) {
-            cloneTerrainAtIndex(index);
+        if (!isFirebaseMode) {
+            if (button("Clone", x, y + h - 40, btnW, 20, 0, "#9995", "green")) {
+                cloneTerrainAtIndex(index);
+            }
+
+            if (button("Delete", x, y + h - 20, btnW, 20, 0, "#9995", "red")) {
+                deleteTerrainAtIndexConfirm(index);
+            }
         }
 
-        if (button("Delete", x, y + h - 20, btnW, 20, 0, "#9995", "red")) {
-            deleteTerrainAtIndexConfirm(index);
-        }
         if (button("Edit", x + btnW, y + h - 20, btnW, 20, 0, "#9995")) {
             mode = MODE.TERRAIN;
             editTerrainAtIndex(index);

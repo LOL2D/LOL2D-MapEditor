@@ -30,6 +30,18 @@ let globalData = {
     },
 };
 
+const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener("mouseenter", Swal.stopTimer);
+        toast.addEventListener("mouseleave", Swal.resumeTimer);
+    },
+});
+
 // ----------------------- firebase --------------------------
 function chooseMode() {
     setPaused(true);
@@ -62,6 +74,11 @@ function pushEdittedTerrainDataToFirebase() {
     let index = getEditingTerrainIndex();
     if (index >= 0) {
         updateFirebaseTerrain(index, getEditingTerrain());
+    } else {
+        Toast.fire({
+            icon: "info",
+            title: "Chưa Edit Terrain nào để Save",
+        });
     }
 }
 
@@ -372,9 +389,21 @@ function editTerrainAtIndex(index) {
 
     // load image of terrain
     let terrain = getTerrainAtIndex(index);
-    loadImage("terrain-images/" + terrain.name + ".png", (data) => {
-        setTerrainImageData(data);
-    });
+    loadImage(
+        "terrain-images/" + terrain.name + ".png",
+        // on success
+        (data) => {
+            setTerrainImageData(data);
+        },
+        // on failed
+        () => {
+            Toast.fire({
+                icon: "error",
+                title: "Can not get image for this terrain.",
+            });
+            setTerrainImageData(null);
+        }
+    );
 }
 
 // ----------------------- terrain -----------------------
