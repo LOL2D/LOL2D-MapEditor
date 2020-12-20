@@ -118,17 +118,19 @@ function drawGrid(camera, bound) {
     line(camera.x, top, camera.x, bottom);
     line(left, camera.y, right, camera.y);
 
+    // hightlight center screen point
+    noFill();
+    circle(width / 2, height / 2, 10);
+
     // draw info
     let gs = (gridSize / camera.scale).toFixed(2);
+
+    let camx = ~~((width / 2 - camera.x) / camera.scale);
+    let camy = ~~((height / 2 - camera.y) / camera.scale);
+
     fill("white");
     textAlign(LEFT);
-    text(
-        `Camera: ${width / 2 - ~~camera.x} ${height / 2 - ~~camera.y}`,
-        x + 5,
-        y + h - 70,
-        150,
-        30
-    );
+    text(`Camera: ${camx} ${camy}`, x + 5, y + h - 70, 150, 30);
     text(`Scale: ${camera.scale.toFixed(2)}`, x + 5, y + h - 50, 100, 30);
     text(`Grid size: ${gs}px`, x + 5, y + h - 30, 150, 30);
     textAlign(CENTER);

@@ -12,8 +12,8 @@ function lerpCamera(camera, d = 0.2) {
 }
 
 // source: https://github.com/HoangTran0410/ImageToSpriteJson/blob/db1f19ec11ba899e71dff1af31f656495d5a7281/main.js#L197
-function zoomTo(camera, _ratio) {
-    let ratio = max(0.1, _ratio);
+function zoomTo(camera, ratio) {
+    ratio = constrain(ratio, 0.05, 10);
 
     let tiLe = ratio / camera.scale;
 
