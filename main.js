@@ -138,7 +138,7 @@ function drawMenuMap() {
 
         if (button(...UI.editSelectedTerrainBtn)) {
             mode = MODE.TERRAIN;
-            setEditingTerrainIndex(selectedTerrainIndex);
+            editTerrainAtIndex(selectedTerrainIndex);
         }
     }
 
