@@ -77,3 +77,22 @@ function updateFirebaseTerrain(index, data) {
             }
         });
 }
+
+function forceUpdateFirebaseMap(mapData) {
+    firebase
+        .database()
+        .ref("data/")
+        .set(mapData, (error) => {
+            if (error) {
+                Toast.fire({
+                    icon: "error",
+                    title: "Failed to save map data. Please try again.",
+                });
+            } else {
+                Toast.fire({
+                    icon: "success",
+                    title: "Map data has been pushed to firebase.",
+                });
+            }
+        });
+}

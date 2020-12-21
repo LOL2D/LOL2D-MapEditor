@@ -63,8 +63,14 @@ function drawHeader(t) {
     }
 
     if (getFirebaseMode()) {
-        if (button(...UI.saveTerrainToFireBaseBtn)) {
-            pushEdittedTerrainDataToFirebase();
+        if (mode == MODE.MAP) {
+            if (button(...UI.savePositionToFireBaseBtn)) {
+                pushSelectedTerrainDataToFirebase();
+            }
+        } else {
+            if (button(...UI.saveTerrainToFireBaseBtn)) {
+                pushEdittedTerrainDataToFirebase();
+            }
         }
     }
 

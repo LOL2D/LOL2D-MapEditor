@@ -192,6 +192,23 @@ function pushEdittedTerrainDataToFirebase() {
     }
 }
 
+function pushSelectedTerrainDataToFirebase() {
+    let index = getSelectedTerrainIndex();
+
+    if (index >= 0) {
+        updateFirebaseTerrain(index, getSelectedTerrain());
+    } else {
+        Toast.fire({
+            icon: "info",
+            title: "Chưa Select Terrain nào để Save",
+        });
+    }
+}
+
+function pushMapDataToFirebase() {
+    forceUpdateFirebaseMap(getMapData());
+}
+
 // ----------------------- image data -----------------------
 function getTerrainImageData() {
     return globalData.terraintab.editzone.imageData;
