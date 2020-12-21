@@ -295,17 +295,34 @@ function listScrollTerrains(title, x, y, w, h) {
     let itemW = w;
     let itemH = (h - 40) / itemPerPage;
 
+    let onlineUsers = getOnlineUsers();
+
     for (let i = itemIndex; i < itemIndex + itemPerPage; i++) {
         if (terrains[i]) {
             let itemX = x;
             let itemY = y + (i - itemIndex) * itemH + 20;
 
-            renderTerrainItem(i, terrains[i], itemX, itemY, itemW, itemH);
+            let isEdittingByOtherUser = null;
+            for (let username in onlineUsers) {
+                if (onlineUsers[username] == i) {
+                    isEdittingByOtherUser = username;
+                }
+            }
+
+            renderTerrainItem(
+                i,
+                terrains[i],
+                itemX,
+                itemY,
+                itemW,
+                itemH,
+                isEdittingByOtherUser
+            );
         }
     }
 }
 
-function renderTerrainItem(index, terrain, x, y, w, h) {
+function renderTerrainItem(index, terrain, x, y, w, h, isEdittingByOtherUser) {
     let selectedTerrainIndex = getSelectedTerrainIndex();
 
     // background
@@ -344,6 +361,16 @@ function renderTerrainItem(index, terrain, x, y, w, h) {
     noStroke();
     circle(x + w / 2, y + h / 2, 5);
 
+    // isEdittingByOtherUser
+    if (isEdittingByOtherUser) {
+        noStroke();
+        fill("#000d");
+        rect(x, y, w, h);
+
+        fill("red");
+        text(isEdittingByOtherUser + " đang sửa", x + w / 2, y + h / 2);
+    }
+
     // title
     fill("white");
     noStroke();
@@ -370,9 +397,11 @@ function renderTerrainItem(index, terrain, x, y, w, h) {
             }
         }
 
-        if (button("Edit", x + btnW, y + h - 20, btnW, 20, 0, "#9995")) {
-            mode = MODE.TERRAIN;
-            editTerrainAtIndex(index);
+        if (!isEdittingByOtherUser) {
+            if (button("Edit", x + btnW, y + h - 20, btnW, 20, 0, "#9995")) {
+                mode = MODE.TERRAIN;
+                editTerrainAtIndex(index);
+            }
         }
 
         if (button("Locate", x + btnW * 2, y + h - 20, btnW, 20, 0, "#9995")) {
