@@ -522,7 +522,7 @@ function getEditingTerrainIndex() {
 }
 
 function setEditingTerrainIndex(index) {
-    updateFirebaseOnline(getUserName(), index);
+    getFirebaseMode() && updateFirebaseOnline(getUserName(), index);
     globalData.terraintab.currentTerrainIndex = index;
 }
 
