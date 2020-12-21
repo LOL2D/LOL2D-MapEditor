@@ -14,7 +14,8 @@ function setup() {
     document.body.appendChild(stats.dom);
 
     resetTerrainCamera();
-    resetMapCamera();
+    // resetMapCamera();
+    viewAllMap();
 
     // choose mode before use tool
     chooseMode();
