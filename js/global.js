@@ -93,7 +93,9 @@ function showOnlineUsers() {
 }
 
 window.addEventListener("beforeunload", function (e) {
-    removeFirebaseOnline(getUserName());
+    if (getFirebaseMode()) {
+        removeFirebaseOnline(getUserName());
+    }
 });
 
 // ----------------------- firebase --------------------------
