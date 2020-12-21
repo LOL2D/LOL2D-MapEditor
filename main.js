@@ -71,9 +71,13 @@ function drawHeader(t) {
     if (username) {
         button(username, ...UI.userNameZone);
 
-        if (button(getOnlineCount(), ...UI.onlineCountBtn)) {
+        if (button(getOnlineCount(), ...UI.onlineCountZone)) {
             showOnlineUsers();
         }
+    }
+
+    if (button(...UI.howToUserBtn)) {
+        window.open("https://photos.app.goo.gl/wYDUzT8bR4ryoaj59");
     }
 
     fill("white");

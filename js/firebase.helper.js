@@ -51,10 +51,10 @@ function updateFirebaseOnline(userName, edittingTerrainIndex) {
                     title: "Failed to update online data. Please try again.",
                 });
             } else {
-                Toast.fire({
-                    icon: "success",
-                    title: "Online data has been pushed to firebase.",
-                });
+                // Toast.fire({
+                //     icon: "success",
+                //     title: "Online data has been pushed to firebase.",
+                // });
             }
         });
 }
