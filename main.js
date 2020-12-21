@@ -67,6 +67,11 @@ function drawHeader(t) {
         }
     }
 
+    let username = getUserName();
+    if (username) {
+        button(username, ...UI.userNameZone);
+    }
+
     fill("white");
     text(t, width / 2 + UI.menuTerrainZone[2] / 2, 20);
 }

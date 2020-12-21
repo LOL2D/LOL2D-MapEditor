@@ -6,7 +6,7 @@ const MODE = {
 let globalData = {
     isFirebaseMode: false,
     online: {},
-    userName: "",
+    userName: null,
     maptab: {
         scrollList: {
             itemIndex: 0,
@@ -48,8 +48,10 @@ function getUserName() {
     return globalData.userName;
 }
 function setUserName(userName) {
-    localstorageSaveUserName(userName);
     globalData.userName = userName;
+}
+function isUserNameExist(username) {
+    return globalData.online[username] != null;
 }
 
 function getOnlineUsers() {
@@ -96,43 +98,52 @@ function chooseMode() {
             setPaused(false);
         } else {
             // using fire base
-            let username =
-                localStorageGetUsername() ||
-                "Guest-" + (Math.random() * 10000).toFixed(0);
+            usingFirebaseMode();
+        }
+    });
+}
 
-            Swal.fire({
-                title: "Your Name",
-                text: "To make other user can see your work",
-                input: "text",
-                inputValue: username,
-                showCancelButton: true,
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-            }).then((resultName) => {
-                if (resultName.isConfirmed) {
-                    setPaused(false);
-                    initFireBase();
+function usingFirebaseMode() {
+    let username =
+        localStorageGetUsername() ||
+        "Guest-" + (Math.random() * 10000).toFixed(0);
 
-                    listenToFireBase(
-                        // data
-                        (data) => {
-                            setMapData(data);
-                        },
-                        //online users
-                        (users) => {
-                            setOnlineUsers(users);
-                        }
-                    );
+    Swal.fire({
+        title: "Your Name",
+        text: "To make other user can see your work",
+        input: "text",
+        inputValue: username,
+        showCancelButton: true,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+    }).then((resultName) => {
+        if (resultName.isConfirmed) {
+            setPaused(false);
+            initFireBase();
 
-                    setUserName(resultName.value);
-                    updateFirebaseOnline(resultName.value, -1);
-
-                    setFirebaseMode(true);
-                } else {
-                    // chọn lại mode
-                    chooseMode();
+            listenToFireBase(
+                // data
+                (data) => {
+                    setMapData(data);
+                },
+                //online users
+                (users) => {
+                    setOnlineUsers(users);
                 }
-            });
+            );
+
+            // lưu tên thật vào localstorage
+            localstorageSaveUserName(resultName.value);
+
+            // tạo tên mới có thêm random id (tránh trùng  tên)
+            let name = resultName.value + (Math.random() * 10000).toFixed(0);
+            setUserName(name);
+            updateFirebaseOnline(name, -1);
+
+            setFirebaseMode(true);
+        } else {
+            // chọn lại mode
+            chooseMode();
         }
     });
 }

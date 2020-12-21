@@ -10,7 +10,8 @@ const UI = {
 
     // tabs
     hideMenuBtnZone: [210, 10, 30, 30],
-    saveToFireBaseBtn: ["Save to Firebase", 250, 10, 140, 30, 0, 0, "green"],
+    saveToFireBaseBtn: ["Save to Firebase", 245, 10, 140, 30, 0, 0, "green"],
+    userNameZone: [390, 10, 100, 30],
     author: [10, 75],
 
     // map tab
