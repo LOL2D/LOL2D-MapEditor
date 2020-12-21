@@ -216,6 +216,11 @@
         ]
     },
     {
+        "name": "blue-team/wolf",
+        "position": { "x": 2590, "y": 8282 },
+        "rects": [{ "h": 150, "w": 50, "x": -86, "y": -397 }]
+    },
+    {
         "name": "blue-team/nexus",
         "position": { "x": 995, "y": 8504 },
         "rects": [
@@ -369,6 +374,11 @@
         "rects": [{ "h": 50, "w": 50, "x": 0, "y": 0 }]
     },
     {
+        "name": "red-team/wolf",
+        "position": { "x": 4000, "y": 2309 },
+        "rects": [{ "h": 50, "w": 50, "x": 0, "y": 0 }]
+    },
+    {
         "name": "red-team/nexus",
         "position": { "x": 4816, "y": 4034 },
         "rects": [{ "h": 50, "w": 50, "x": 0, "y": 0 }]
@@ -401,6 +411,11 @@
     {
         "name": "red-team/top3",
         "position": { "x": 8127, "y": 6858 },
+        "rects": [{ "h": 50, "w": 50, "x": 0, "y": 0 }]
+    },
+    {
+        "name": "red-team/top4",
+        "position": { "x": 8125, "y": 6558 },
         "rects": [{ "h": 50, "w": 50, "x": 0, "y": 0 }]
     }
 ]
