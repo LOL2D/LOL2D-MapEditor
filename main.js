@@ -191,16 +191,19 @@ function drawEditMapZone(x, y, w, h) {
             }
 
             // select rect -> selecte terrain
-            if (isMousePressed() && mouseButton == LEFT) {
-                if (isMouseInRect(rx, ry, rw, rh)) {
-                    setSelectedTerrainIndex(i);
-                    setSelectedTerrainMouseDelta(
-                        terrain.position.x * camera.scale + camera.x - mouseX,
-                        terrain.position.y * camera.scale + camera.y - mouseY
-                    );
+            if (
+                isMousePressed() &&
+                isMouseInRect(x, y, w, h) &&
+                isMouseInRect(rx, ry, rw, rh) &&
+                mouseButton == LEFT
+            ) {
+                setSelectedTerrainIndex(i);
+                setSelectedTerrainMouseDelta(
+                    terrain.position.x * camera.scale + camera.x - mouseX,
+                    terrain.position.y * camera.scale + camera.y - mouseY
+                );
 
-                    isSelectTerrain = true;
-                }
+                isSelectTerrain = true;
             }
         }
 
@@ -558,13 +561,16 @@ function drawEditTerrainZone(x, y, w, h) {
         }
 
         // select rect
-        if (isMousePressed() && mouseButton == LEFT) {
-            if (isMouseInRect(rx, ry, rw, rh)) {
-                setSelectedRectIndex(i);
-                setSelectedRectMouseDelta(rx - mouseX, ry - mouseY);
+        if (
+            isMousePressed() &&
+            isMouseInRect(x, y, w, h) &&
+            isMouseInRect(rx, ry, rw, rh) &&
+            mouseButton == LEFT
+        ) {
+            setSelectedRectIndex(i);
+            setSelectedRectMouseDelta(rx - mouseX, ry - mouseY);
 
-                isSelectRect = true;
-            }
+            isSelectRect = true;
         }
 
         // draw rect
