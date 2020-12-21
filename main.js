@@ -63,7 +63,7 @@ function drawHeader(t) {
     }
 
     if (getFirebaseMode()) {
-        if (button(...UI.saveToFireBaseBtn)) {
+        if (button(...UI.saveTerrainToFireBaseBtn)) {
             pushEdittedTerrainDataToFirebase();
         }
     }
