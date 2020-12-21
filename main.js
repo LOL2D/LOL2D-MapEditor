@@ -70,6 +70,10 @@ function drawHeader(t) {
     let username = getUserName();
     if (username) {
         button(username, ...UI.userNameZone);
+
+        if (button(getOnlineCount(), ...UI.onlineCountBtn)) {
+            showOnlineUsers();
+        }
     }
 
     fill("white");

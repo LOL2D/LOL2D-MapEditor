@@ -61,6 +61,36 @@ function setOnlineUsers(users) {
     console.log(users);
     globalData.online = users;
 }
+function getOnlineCount() {
+    // https://stackoverflow.com/a/6700
+    var size = 0,
+        key;
+    let onlineUsers = getOnlineUsers();
+
+    for (key in onlineUsers) {
+        if (onlineUsers.hasOwnProperty(key)) size++;
+    }
+
+    return size;
+}
+
+function showOnlineUsers() {
+    let users = getOnlineUsers();
+    let li = "";
+
+    for (let username in users) {
+        li += `<li>${username}</li>`;
+    }
+
+    Swal.fire({
+        title: "Online users",
+        html: `
+            <ul>
+                ${li}
+            </ul>
+        `,
+    });
+}
 
 window.addEventListener("beforeunload", function (e) {
     removeFirebaseOnline(getUserName());
