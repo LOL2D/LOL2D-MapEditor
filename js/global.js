@@ -3,9 +3,10 @@ const MODE = {
     MAP: "Map",
 };
 
-let isFirebaseMode = false;
-
 let globalData = {
+    isFirebaseMode: false,
+    online: {},
+    userName: "",
     maptab: {
         scrollList: {
             itemIndex: 0,
@@ -42,30 +43,96 @@ const Toast = Swal.mixin({
     },
 });
 
+// ----------------------- Online ---------------------------
+function getUserName() {
+    return globalData.userName;
+}
+function setUserName(userName) {
+    localstorageSaveUserName(userName);
+    globalData.userName = userName;
+}
+
+function getOnlineUsers() {
+    return globalData.online;
+}
+function setOnlineUsers(users) {
+    console.log(users);
+    globalData.online = users;
+}
+
+window.addEventListener("beforeunload", function (e) {
+    removeFirebaseOnline(getUserName());
+});
+
 // ----------------------- firebase --------------------------
+function getFirebaseMode() {
+    return globalData.isFirebaseMode;
+}
+function setFirebaseMode(value) {
+    globalData.isFirebaseMode = value;
+}
 function chooseMode() {
     setPaused(true);
     Swal.fire({
         title: "Choose mode",
+        html: `
+        <p style="text-align: left;">
+            <b>+ Normal</b>: Play zone<br/>
+            <b>+ Firebase</b>: Connect to firebase, create map for 
+                <a target="_blank" href="https://github.com/LOL2D/LOL2D-Core">LOL2D-Core</a>
+        </p>`,
         showCancelButton: true,
         cancelButtonText: "Firebase",
         confirmButtonText: "Normal",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
     }).then((result) => {
-        setPaused(false);
-
         if (result.isConfirmed) {
             // using normal mode
             loadJSON("map/sample.json", (data) => {
                 setMapData(data);
             });
-            isFirebaseMode = false;
+            setFirebaseMode(false);
+            setPaused(false);
         } else {
             // using fire base
-            initFireBase();
-            listenToFireBase((data) => {
-                setMapData(data);
+            let username =
+                localStorageGetUsername() ||
+                "Guest-" + (Math.random() * 10000).toFixed(0);
+
+            Swal.fire({
+                title: "Your Name",
+                text: "To make other user can see your work",
+                input: "text",
+                inputValue: username,
+                showCancelButton: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+            }).then((resultName) => {
+                if (resultName.isConfirmed) {
+                    setPaused(false);
+                    initFireBase();
+
+                    listenToFireBase(
+                        // data
+                        (data) => {
+                            setMapData(data);
+                        },
+                        //online users
+                        (users) => {
+                            setOnlineUsers(users);
+                        }
+                    );
+
+                    setUserName(resultName.value);
+                    updateFirebaseOnline(resultName.value, -1);
+
+                    setFirebaseMode(true);
+                } else {
+                    // chọn lại mode
+                    chooseMode();
+                }
             });
-            isFirebaseMode = true;
         }
     });
 }

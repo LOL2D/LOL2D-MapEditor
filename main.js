@@ -61,7 +61,7 @@ function drawHeader(t) {
         isShowMenu = !isShowMenu;
     }
 
-    if (isFirebaseMode) {
+    if (getFirebaseMode()) {
         if (button(...UI.saveToFireBaseBtn)) {
             pushEdittedTerrainDataToFirebase();
         }
@@ -92,7 +92,7 @@ function drawMenuMap() {
     rect(...UI.menuMapZone);
 
     // buttons
-    if (!isFirebaseMode) {
+    if (!getFirebaseMode()) {
         if (button(...UI.changeMapSizeBtn)) {
             changeMapSize();
         }
@@ -110,7 +110,7 @@ function drawMenuMap() {
 
     let selectedTerrainIndex = getSelectedTerrainIndex();
     if (selectedTerrainIndex >= 0) {
-        if (!isFirebaseMode) {
+        if (!getFirebaseMode()) {
             if (button(...UI.deleteSelectedTerrainBtn)) {
                 deleteTerrainAtIndexConfirm(selectedTerrainIndex);
             }
@@ -263,7 +263,7 @@ function listScrollTerrains(title, x, y, w, h) {
     text(t, x + textWidth(t) / 2, y - 15);
 
     // buttons
-    if (!isFirebaseMode) {
+    if (!getFirebaseMode()) {
         if (button("New +", x + w - 50, y - 30, 50, 25, 0, 0, "green")) {
             newTerrain(() => {
                 mode = MODE.TERRAIN;
@@ -360,7 +360,7 @@ function renderTerrainItem(index, terrain, x, y, w, h) {
         // show buttons
         let btnW = w / 3;
 
-        if (!isFirebaseMode) {
+        if (!getFirebaseMode()) {
             if (button("Clone", x, y + h - 40, btnW, 20, 0, "#9995", "green")) {
                 cloneTerrainAtIndex(index);
             }
@@ -390,14 +390,14 @@ function drawMenuTerrain() {
     rect(...UI.menuTerrainZone);
 
     // buttons
-    if (!isFirebaseMode) {
+    if (!getFirebaseMode()) {
         if (button(...UI.newTerrainBtn)) {
             newTerrain();
         }
     }
 
     if (getEditingTerrain()) {
-        if (!isFirebaseMode) {
+        if (!getFirebaseMode()) {
             if (button(...UI.cloneTerrainBtn)) {
                 cloneEditingTerrain();
             }
