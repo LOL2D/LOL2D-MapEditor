@@ -17,7 +17,7 @@ let globalData = {
             camera: { x: 0, y: 0, scale: 1, xTo: 0, yTo: 0, scaleTo: 1 },
             selectedTerrainIndex: -1,
             selectedTerrainMouseDelta: { x: 0, y: 0 },
-            mapsize: [7200, 7200],
+            mapsize: [6000, 6000],
         },
     },
     terraintab: {
