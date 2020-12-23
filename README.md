@@ -1,4 +1,4 @@
-# LOL2D-MapEditor
+# [DEPRECATED] LOL2D-MapEditor
 
 
 Một công cụ online giúp tạo bản đồ cho game LOL2D-Core
